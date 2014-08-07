@@ -45,7 +45,9 @@ extern NSString *const segmentBarItemID;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) UIScrollView *slideView;
-@property (nonatomic, strong, readonly) UIImageView *indicator;
+@property (nonatomic, strong, readonly) UIView *indicator;
+
+@property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 
 @property (nonatomic, weak, readonly) UIViewController *selectedViewController;
 @property (nonatomic, assign, readonly) NSInteger selectedIndex;
