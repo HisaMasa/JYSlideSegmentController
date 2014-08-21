@@ -304,7 +304,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     self.indicatorBgView.frame = frame;
     
     NSInteger index = ceilf(percent * self.viewControllers.count);
-    if (index > 0 && index < self.viewControllers.count) {
+    if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
     }
   }
