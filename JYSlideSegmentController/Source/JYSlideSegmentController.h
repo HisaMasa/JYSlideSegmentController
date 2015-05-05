@@ -45,13 +45,17 @@ extern NSString *const segmentBarItemID;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) UIScrollView *slideView;
-@property (nonatomic, strong, readonly) UIView *indicator;
 
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 
 @property (nonatomic, weak, readonly) UIViewController *selectedViewController;
 @property (nonatomic, assign, readonly) NSInteger selectedIndex;
 
+/**
+ *  Custom UI
+ */
+@property (nonatomic, assign) CGFloat itemWidth;
+@property (nonatomic, strong) UIColor *indicatorColor;
 
 /**
  *  By default segmentBar use viewController's title for segment's button title

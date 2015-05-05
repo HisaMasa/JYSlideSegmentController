@@ -54,7 +54,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 @property (nonatomic, strong, readwrite) UICollectionView *segmentBar;
 @property (nonatomic, strong, readwrite) UIScrollView *slideView;
 @property (nonatomic, assign, readwrite) NSInteger selectedIndex;
-@property (nonatomic, strong, readwrite) UIView *indicator;
+@property (nonatomic, strong) UIView *indicator;
 @property (nonatomic, strong) UIView *indicatorBgView;
 
 @property (nonatomic, strong) UICollectionViewFlowLayout *segmentBarLayout;
@@ -66,6 +66,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 @implementation JYSlideSegmentController
 @synthesize viewControllers = _viewControllers;
+@synthesize itemWidth = _itemWidth;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
 {
@@ -90,6 +91,16 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [super viewDidAppear:animated];
   CGSize conentSize = CGSizeMake(self.view.frame.size.width * self.viewControllers.count, 0);
   [self.slideView setContentSize:conentSize];
+}
+
+- (void)viewDidLayoutSubviews
+{
+  CGRect frame = self.indicatorBgView.frame;
+  frame.size.width = self.itemWidth;
+  self.indicatorBgView.frame = frame;
+  CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
+  CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, INDICATOR_HEIGHT);
+  self.indicator.frame = indicatorFrame;
 }
 
 #pragma mark - Setup
@@ -147,7 +158,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (!_indicatorBgView) {
     CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - INDICATOR_HEIGHT - 1,
-                              self.view.frame.size.width / self.viewControllers.count, INDICATOR_HEIGHT);
+                              self.itemWidth, INDICATOR_HEIGHT);
     _indicatorBgView = [[UIView alloc] initWithFrame:frame];
     _indicatorBgView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     _indicatorBgView.backgroundColor = [UIColor clearColor];
@@ -159,31 +170,44 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (UIView *)indicator
 {
   if (!_indicator) {
-    CGFloat width = self.view.frame.size.width / self.viewControllers.count - self.indicatorInsets.left - self.indicatorInsets.right;
+    CGFloat width = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
     CGRect frame = CGRectMake(self.indicatorInsets.left, 0, width, INDICATOR_HEIGHT);
     _indicator = [[UIView alloc] initWithFrame:frame];
     _indicator.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-    _indicator.backgroundColor = [UIColor yellowColor];
+    _indicator.backgroundColor = self.indicatorColor ? : [UIColor yellowColor];
   }
   return _indicator;
 }
 
-- (void)setIndicatorInsets:(UIEdgeInsets)indicatorInsets
+- (CGFloat)itemWidth
 {
-  _indicatorInsets = indicatorInsets;
-  CGRect frame = _indicator.frame;
-  frame.origin.x = _indicatorInsets.left;
-  CGFloat width = self.view.frame.size.width / self.viewControllers.count - _indicatorInsets.left - _indicatorInsets.right;
-  frame.size.width = width;
-  frame.size.height = INDICATOR_HEIGHT;
-  _indicator.frame = frame;
+  if (!_itemWidth) {
+    _itemWidth = self.view.frame.size.width / self.viewControllers.count;
+  }
+  return _itemWidth;
+}
+
+- (void)setItemWidth:(CGFloat)itemWidth
+{
+  _itemWidth = itemWidth;
+  if (_segmentBarLayout && _segmentBar) {
+    _segmentBarLayout.itemSize = CGSizeMake(_itemWidth, SEGMENT_BAR_HEIGHT);
+    [_segmentBar setCollectionViewLayout:_segmentBarLayout animated:NO];
+    [self.view setNeedsLayout];
+  }
+}
+
+- (void)setIndicatorColor:(UIColor *)indicatorColor
+{
+  _indicatorColor = indicatorColor;
+  _indicator.backgroundColor = _indicatorColor;
 }
 
 - (UICollectionViewFlowLayout *)segmentBarLayout
 {
   if (!_segmentBarLayout) {
     _segmentBarLayout = [[UICollectionViewFlowLayout alloc] init];
-    _segmentBarLayout.itemSize = CGSizeMake(self.view.frame.size.width / self.viewControllers.count, SEGMENT_BAR_HEIGHT);
+    _segmentBarLayout.itemSize = CGSizeMake(self.itemWidth, SEGMENT_BAR_HEIGHT);
     _segmentBarLayout.sectionInset = UIEdgeInsetsZero;
     _segmentBarLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _segmentBarLayout.minimumLineSpacing = 0;
@@ -277,6 +301,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
   [self setSelectedIndex:indexPath.row];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
+  [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_selectedIndex inSection:0]
+                          atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -300,13 +326,21 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     // set indicator frame
     CGRect frame = self.indicatorBgView.frame;
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
-    frame.origin.x = scrollView.frame.size.width * percent;
+    frame.origin.x = self.segmentBar.contentSize.width * percent;
     self.indicatorBgView.frame = frame;
     
     NSInteger index = ceilf(percent * self.viewControllers.count);
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
     }
+  }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+  if (scrollView == self.slideView) {
+    [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_selectedIndex inSection:0]
+                            atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
   }
 }
 
@@ -323,6 +357,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   _selectedIndex = NSNotFound;
   [self setSelectedIndex:0];
   [self scrollToViewWithIndex:0 animated:NO];
+  [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]
+                          atScrollPosition:UICollectionViewScrollPositionLeft animated:NO];
   [self.segmentBar reloadData];
 }
 
