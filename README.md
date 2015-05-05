@@ -13,7 +13,7 @@ JYSlideSegmentController is a view controllers container, just like the UITabBar
 
 ```ruby
 platform :ios, '6.0'
-pod "JYSlideSegmentController", "~> 1.0.0"
+pod "JYSlideSegmentController", "~> 1.1.0"
 ```
 
 ## License
