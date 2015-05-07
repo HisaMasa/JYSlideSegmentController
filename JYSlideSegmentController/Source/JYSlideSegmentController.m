@@ -56,6 +56,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 @property (nonatomic, assign, readwrite) NSInteger selectedIndex;
 @property (nonatomic, strong) UIView *indicator;
 @property (nonatomic, strong) UIView *indicatorBgView;
+@property (nonatomic, strong) UIView *separator;
 
 @property (nonatomic, strong) UICollectionViewFlowLayout *segmentBarLayout;
 
@@ -101,6 +102,9 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
   CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, INDICATOR_HEIGHT);
   self.indicator.frame = indicatorFrame;
+  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame) - 1,
+                                     CGRectGetWidth(self.segmentBar.frame), 1);
+  self.separator.frame = separatorFrame;
 }
 
 #pragma mark - Setup
@@ -115,6 +119,13 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [self.view addSubview:self.slideView];
   [self.segmentBar registerClass:[JYSegmentBarItem class] forCellWithReuseIdentifier:segmentBarItemID];
   [self.segmentBar addSubview:self.indicatorBgView];
+
+  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame) - 1,
+                                     CGRectGetWidth(self.segmentBar.frame), 1);
+  _separator = [[UIView alloc] initWithFrame:separatorFrame];
+  [_separator setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin];
+  [_separator setBackgroundColor:self.separatorColor];
+  [self.view addSubview:_separator];
 }
 
 #pragma mark - Property
@@ -146,10 +157,9 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _segmentBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _segmentBar.delegate = self;
     _segmentBar.dataSource = self;
-    UIView *separator = [[UIView alloc] initWithFrame:CGRectMake(0, frame.size.height - 1, frame.size.width, 1)];
-    [separator setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin];
-    [separator setBackgroundColor:UIColorFromRGB(0xdcdcdc)];
-    [_segmentBar addSubview:separator];
+    _segmentBar.showsHorizontalScrollIndicator = NO;
+    _segmentBar.showsVerticalScrollIndicator = NO;
+    _segmentBar.scrollsToTop = NO;
   }
   return _segmentBar;
 }
@@ -203,6 +213,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   _indicator.backgroundColor = _indicatorColor;
 }
 
+- (UIColor *)separatorColor
+{
+  if (!_separatorColor) {
+    _separatorColor = UIColorFromRGB(0xdcdcdc);
+  }
+  return _separatorColor;
+}
+
 - (UICollectionViewFlowLayout *)segmentBarLayout
 {
   if (!_segmentBarLayout) {
@@ -236,6 +254,9 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     [toSelectController didMoveToParentViewController:self];
   }
   _selectedIndex = selectedIndex;
+  if ([_delegate respondsToSelector:@selector(didSelectViewController:)]) {
+    [_delegate didSelectViewController:self.selectedViewController];
+  }
 }
 
 - (void)setViewControllers:(NSArray *)viewControllers
@@ -283,7 +304,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
 
   JYSegmentBarItem *segmentBarItem = [collectionView dequeueReusableCellWithReuseIdentifier:segmentBarItemID
-                                                                                forIndexPath:indexPath];
+                                                                               forIndexPath:indexPath];
   UIViewController *vc = self.viewControllers[indexPath.row];
   segmentBarItem.titleLabel.text = vc.title;
   return segmentBarItem;
@@ -295,14 +316,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     return;
   }
 
-  UIViewController *vc = self.viewControllers[indexPath.row];
-  if ([_delegate respondsToSelector:@selector(slideSegment:didSelectedViewController:)]) {
-    [_delegate slideSegment:collectionView didSelectedViewController:vc];
-  }
   [self setSelectedIndex:indexPath.row];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
-  [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_selectedIndex inSection:0]
-                          atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+  [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+  if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
+    [_delegate didFullyShowViewController:self.selectedViewController];
+  }
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -313,8 +332,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
   BOOL flag = YES;
   UIViewController *vc = self.viewControllers[indexPath.row];
-  if ([_delegate respondsToSelector:@selector(slideSegment:shouldSelectViewController:)]) {
-    flag = [_delegate slideSegment:collectionView shouldSelectViewController:vc];
+  if ([_delegate respondsToSelector:@selector(shouldSelectViewController:)]) {
+    flag = [_delegate shouldSelectViewController:vc];
   }
   return flag;
 }
@@ -328,7 +347,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
     frame.origin.x = self.segmentBar.contentSize.width * percent;
     self.indicatorBgView.frame = frame;
-    
+
     NSInteger index = ceilf(percent * self.viewControllers.count);
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
@@ -336,11 +355,13 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
 }
 
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
   if (scrollView == self.slideView) {
-    [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:_selectedIndex inSection:0]
-                            atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+    [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+    if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
+      [_delegate didFullyShowViewController:self.selectedViewController];
+    }
   }
 }
 
@@ -357,9 +378,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   _selectedIndex = NSNotFound;
   [self setSelectedIndex:0];
   [self scrollToViewWithIndex:0 animated:NO];
-  [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]
-                          atScrollPosition:UICollectionViewScrollPositionLeft animated:NO];
+  [self segmentBarScrollToIndex:0 animated:NO];
   [self.segmentBar reloadData];
+}
+
+- (void)segmentBarScrollToIndex:(NSInteger)index animated:(BOOL)animated
+{
+  [self.segmentBar scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]
+                          atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:animated];
 }
 
 @end
