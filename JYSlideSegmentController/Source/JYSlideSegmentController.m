@@ -319,9 +319,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [self setSelectedIndex:indexPath.row];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
   [self segmentBarScrollToIndex:_selectedIndex animated:YES];
-  if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
-    [_delegate didFullyShowViewController:self.selectedViewController];
-  }
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -365,12 +362,25 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
 }
 
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+  if (scrollView == self.slideView) {
+    [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+    if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
+      [_delegate didFullyShowViewController:self.selectedViewController];
+    }
+  }
+}
+
 #pragma mark - Action
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated
 {
   CGRect rect = self.slideView.bounds;
   rect.origin.x = rect.size.width * index;
   [self.slideView setContentOffset:CGPointMake(rect.origin.x, rect.origin.y) animated:animated];
+  if (!animated && [_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
+    [_delegate didFullyShowViewController:self.selectedViewController];
+  }
 }
 
 - (void)reset
