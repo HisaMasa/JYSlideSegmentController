@@ -68,6 +68,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 @implementation JYSlideSegmentController
 @synthesize viewControllers = _viewControllers;
 @synthesize itemWidth = _itemWidth;
+@synthesize separatorColor = _separatorColor;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
 {
@@ -102,7 +103,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
   CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, INDICATOR_HEIGHT);
   self.indicator.frame = indicatorFrame;
-  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame) - 1,
+  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
                                      CGRectGetWidth(self.segmentBar.frame), 1);
   self.separator.frame = separatorFrame;
 }
@@ -120,7 +121,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [self.segmentBar registerClass:[JYSegmentBarItem class] forCellWithReuseIdentifier:segmentBarItemID];
   [self.segmentBar addSubview:self.indicatorBgView];
 
-  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame) - 1,
+  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
                                      CGRectGetWidth(self.segmentBar.frame), 1);
   _separator = [[UIView alloc] initWithFrame:separatorFrame];
   [_separator setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin];
@@ -167,7 +168,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (UIView *)indicatorBgView
 {
   if (!_indicatorBgView) {
-    CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - INDICATOR_HEIGHT - 1,
+    CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - INDICATOR_HEIGHT,
                               self.itemWidth, INDICATOR_HEIGHT);
     _indicatorBgView = [[UIView alloc] initWithFrame:frame];
     _indicatorBgView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
@@ -219,6 +220,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _separatorColor = UIColorFromRGB(0xdcdcdc);
   }
   return _separatorColor;
+}
+
+- (void)setSeparatorColor:(UIColor *)separatorColor
+{
+  _separatorColor = separatorColor;
+  self.separator.backgroundColor = _separatorColor;
 }
 
 - (UICollectionViewFlowLayout *)segmentBarLayout
