@@ -8,8 +8,8 @@
 
 #import "JYSlideSegmentController.h"
 
-#define SEGMENT_BAR_HEIGHT 44
-#define INDICATOR_HEIGHT 3
+#define SEGMENT_BAR_HEIGHT (44)
+#define INDICATOR_HEIGHT (3)
 
 #define UIColorFromRGB(rgbValue) \
 [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \
@@ -101,7 +101,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   frame.size.width = self.itemWidth;
   self.indicatorBgView.frame = frame;
   CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
-  CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, INDICATOR_HEIGHT);
+  CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, self.indicatorHeight);
   self.indicator.frame = indicatorFrame;
   CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
                                      CGRectGetWidth(self.segmentBar.frame), 1);
@@ -168,8 +168,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (UIView *)indicatorBgView
 {
   if (!_indicatorBgView) {
-    CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - INDICATOR_HEIGHT,
-                              self.itemWidth, INDICATOR_HEIGHT);
+    CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - self.indicatorHeight,
+                              self.itemWidth, self.indicatorHeight);
     _indicatorBgView = [[UIView alloc] initWithFrame:frame];
     _indicatorBgView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     _indicatorBgView.backgroundColor = [UIColor clearColor];
@@ -182,12 +182,20 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (!_indicator) {
     CGFloat width = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
-    CGRect frame = CGRectMake(self.indicatorInsets.left, 0, width, INDICATOR_HEIGHT);
+    CGRect frame = CGRectMake(self.indicatorInsets.left, 0, width, self.indicatorHeight);
     _indicator = [[UIView alloc] initWithFrame:frame];
     _indicator.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     _indicator.backgroundColor = self.indicatorColor ? : [UIColor yellowColor];
   }
   return _indicator;
+}
+
+- (CGFloat)indicatorHeight
+{
+  if (!_indicatorHeight) {
+    _indicatorHeight = INDICATOR_HEIGHT;
+  }
+  return _indicatorHeight;
 }
 
 - (CGFloat)itemWidth

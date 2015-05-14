@@ -46,8 +46,6 @@ extern NSString *const segmentBarItemID;
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) UIScrollView *slideView;
 
-@property (nonatomic, assign) UIEdgeInsets indicatorInsets;
-
 @property (nonatomic, weak, readonly) UIViewController *selectedViewController;
 @property (nonatomic, assign, readonly) NSInteger selectedIndex;
 
@@ -56,6 +54,8 @@ extern NSString *const segmentBarItemID;
  */
 @property (nonatomic, assign) CGFloat itemWidth;
 @property (nonatomic, strong) UIColor *indicatorColor;
+@property (nonatomic, assign) CGFloat indicatorHeight;
+@property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 @property (nonatomic, strong) UIColor *separatorColor;
 
 /**
