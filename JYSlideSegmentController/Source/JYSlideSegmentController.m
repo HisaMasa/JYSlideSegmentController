@@ -97,7 +97,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (void)viewDidLayoutSubviews
 {
-  CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - self.indicatorHeight,
+  [super viewDidLayoutSubviews];
+  CGRect frame = CGRectMake(_itemWidth * self.selectedIndex, self.segmentBar.frame.size.height - self.indicatorHeight,
                             self.itemWidth, self.indicatorHeight);
   self.indicatorBgView.frame = frame;
   CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
