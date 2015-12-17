@@ -36,6 +36,21 @@ extern NSString *const segmentBarItemID;
 - (BOOL)shouldSelectViewController:(UIViewController *)viewController;
 @end
 
+@protocol JYSlideViewDelegate <NSObject>
+
+@optional
+- (BOOL)slideViewPanGestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
+- (BOOL)slideViewPanGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+    shouldRecognizeSimultaneouslyWithGestureRecognizer:
+        (UIGestureRecognizer *)otherGestureRecognizer;
+@end
+
+@interface JYSlideView : UIScrollView <UIGestureRecognizerDelegate>
+
+@property (nonatomic, weak) id<JYSlideViewDelegate> slideDelegate;
+
+@end
+
 @interface JYSlideSegmentController : UIViewController
 
 /**
@@ -44,7 +59,7 @@ extern NSString *const segmentBarItemID;
 @property (nonatomic, copy) NSArray *viewControllers;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
-@property (nonatomic, strong, readonly) UIScrollView *slideView;
+@property (nonatomic, strong, readonly) JYSlideView *slideView;
 
 @property (nonatomic, weak, readonly) UIViewController *selectedViewController;
 @property (nonatomic, assign, readonly) NSInteger selectedIndex;
@@ -66,6 +81,8 @@ extern NSString *const segmentBarItemID;
 @property (nonatomic, assign) id <JYSlideSegmentDataSource> dataSource;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers;
+- (instancetype)initWithViewControllers:(NSArray *)viewControllers
+                             startIndex:(NSInteger)startIndex;
 
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated;
 
