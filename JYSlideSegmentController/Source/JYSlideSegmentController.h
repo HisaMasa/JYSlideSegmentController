@@ -24,6 +24,10 @@ extern NSString *const segmentBarItemID;
 - (UICollectionViewCell *)slideSegment:(UICollectionView *)segmentBar
                 cellForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+- (CGSize)slideSegment:(UICollectionView *)segmentBar
+                layout:(UICollectionViewLayout *)segmentBarViewLayout
+sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
+
 @optional
 - (NSInteger)numberOfSectionsInslideSegment:(UICollectionView *)segmentBar;
 
@@ -68,6 +72,7 @@ extern NSString *const segmentBarItemID;
  *  Custom UI
  */
 @property (nonatomic, assign) CGFloat itemWidth;
+@property (nonatomic, assign) CGFloat segmentBarWidth;
 @property (nonatomic, strong) UIColor *indicatorColor;
 @property (nonatomic, assign) CGFloat indicatorHeight;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;

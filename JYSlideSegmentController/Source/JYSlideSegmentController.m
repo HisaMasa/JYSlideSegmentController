@@ -223,6 +223,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   if (!_segmentBar) {
     CGRect frame = self.view.bounds;
     frame.size.height = SEGMENT_BAR_HEIGHT;
+    frame.size.width = self.segmentBarWidth;
     _segmentBar = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:self.segmentBarLayout];
     _segmentBar.backgroundColor = [UIColor whiteColor];
     _segmentBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -266,6 +267,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _indicatorHeight = INDICATOR_HEIGHT;
   }
   return _indicatorHeight;
+}
+
+- (CGFloat)segmentBarWidth
+{
+  if (!_segmentBarWidth) {
+    _segmentBarWidth = self.view.bounds.size.width;
+  }
+  return _segmentBarWidth;
 }
 
 - (CGFloat)itemWidth
@@ -395,6 +404,19 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   UIViewController *vc = self.viewControllers[indexPath.row];
   segmentBarItem.titleLabel.text = vc.title;
   return segmentBarItem;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView
+                  layout:(UICollectionViewLayout *)collectionViewLayout
+  sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  if ([_dataSource respondsToSelector:@selector(slideSegment:layout:sizeForItemAtIndexPath:)]) {
+    return [_dataSource slideSegment:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
+  }
+  CGSize cellSize;
+  cellSize.height = SEGMENT_BAR_HEIGHT;
+  cellSize.width = self.itemWidth;
+  return cellSize;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
