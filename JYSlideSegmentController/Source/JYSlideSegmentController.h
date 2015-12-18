@@ -73,6 +73,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
  */
 @property (nonatomic, assign) CGFloat itemWidth;
 @property (nonatomic, assign) CGFloat segmentBarWidth;
+@property (nonatomic, assign) CGFloat segmentBarHeight;
 @property (nonatomic, strong) UIColor *indicatorColor;
 @property (nonatomic, assign) CGFloat indicatorHeight;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;

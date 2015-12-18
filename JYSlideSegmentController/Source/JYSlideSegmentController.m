@@ -8,7 +8,6 @@
 
 #import "JYSlideSegmentController.h"
 
-#define SEGMENT_BAR_HEIGHT (44)
 #define INDICATOR_HEIGHT (3)
 
 #define UIColorFromRGB(rgbValue) \
@@ -155,7 +154,9 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)viewDidLayoutSubviews
 {
   [super viewDidLayoutSubviews];
-  CGRect frame = CGRectMake(_itemWidth * self.selectedIndex, self.segmentBar.frame.size.height - self.indicatorHeight,
+  CGRect itemFrame = [self frameForSegmentItemAtIndex:self.selectedIndex];
+  CGRect frame = CGRectMake(itemFrame.origin.x,
+                            self.segmentBar.frame.size.height - self.indicatorHeight,
                             self.itemWidth, self.indicatorHeight);
   self.indicatorBgView.frame = frame;
   CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
@@ -222,7 +223,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (!_segmentBar) {
     CGRect frame = self.view.bounds;
-    frame.size.height = SEGMENT_BAR_HEIGHT;
+    frame.size.height = self.segmentBarHeight;
     frame.size.width = self.segmentBarWidth;
     _segmentBar = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:self.segmentBarLayout];
     _segmentBar.backgroundColor = [UIColor whiteColor];
@@ -277,6 +278,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   return _segmentBarWidth;
 }
 
+- (CGFloat)segmentBarHeight
+{
+  if (!_segmentBarHeight) {
+    _segmentBarHeight = 40;
+  }
+  return _segmentBarHeight;
+}
+
 - (CGFloat)itemWidth
 {
   if (!_itemWidth) {
@@ -289,7 +298,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   _itemWidth = itemWidth;
   if (_segmentBarLayout && _segmentBar) {
-    _segmentBarLayout.itemSize = CGSizeMake(_itemWidth, SEGMENT_BAR_HEIGHT);
+    _segmentBarLayout.itemSize = CGSizeMake(_itemWidth, self.segmentBarHeight);
     [_segmentBar setCollectionViewLayout:_segmentBarLayout animated:NO];
     [self.view setNeedsLayout];
   }
@@ -319,7 +328,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (!_segmentBarLayout) {
     _segmentBarLayout = [[UICollectionViewFlowLayout alloc] init];
-    _segmentBarLayout.itemSize = CGSizeMake(self.itemWidth, SEGMENT_BAR_HEIGHT);
     _segmentBarLayout.sectionInset = UIEdgeInsetsZero;
     _segmentBarLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _segmentBarLayout.minimumLineSpacing = 0;
@@ -414,7 +422,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     return [_dataSource slideSegment:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
   }
   CGSize cellSize;
-  cellSize.height = SEGMENT_BAR_HEIGHT;
+  cellSize.height = self.segmentBarHeight;
   cellSize.width = self.itemWidth;
   return cellSize;
 }
@@ -452,14 +460,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     CGRect frame = self.indicatorBgView.frame;
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
     CGFloat destination = percent * self.viewControllers.count;
-
-    frame.origin.x = self.segmentBar.contentSize.width * percent;
-    self.indicatorBgView.frame = frame;
-
     NSInteger index = destination >= self.lastDestination ? ceilf(destination)
                                                           : floor(destination);
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
+      CGRect itemFrame = [self frameForSegmentItemAtIndex:index];
+      frame.origin.x = itemFrame.origin.x;
+      self.itemWidth = itemFrame.size.width;
+      self.indicatorBgView.frame = frame;
     }
   }
 }
@@ -557,5 +565,11 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [self configureViewControllerFrame:self.selectedViewController];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
 }
-@end
 
+- (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
+{
+  NSIndexPath *path = [NSIndexPath indexPathForRow:index inSection:0];
+  UICollectionViewCell *cell = [self.segmentBar cellForItemAtIndexPath:path];
+  return cell.frame;
+}
+@end
