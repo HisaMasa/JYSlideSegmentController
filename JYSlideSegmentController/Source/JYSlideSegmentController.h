@@ -28,6 +28,7 @@ extern NSString *const segmentBarItemID;
                 layout:(UICollectionViewLayout *)segmentBarViewLayout
 sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+
 @optional
 - (NSInteger)numberOfSectionsInslideSegment:(UICollectionView *)segmentBar;
 
@@ -38,6 +39,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (void)didSelectViewController:(UIViewController *)viewController;
 - (void)didFullyShowViewController:(UIViewController *)viewController;
 - (BOOL)shouldSelectViewController:(UIViewController *)viewController;
+- (void)didSlideSegmentScroll:(UIScrollView *)scrollView;
 @end
 
 @protocol JYSlideViewDelegate <NSObject>
@@ -78,6 +80,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @property (nonatomic, assign) CGFloat indicatorHeight;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 @property (nonatomic, strong) UIColor *separatorColor;
+@property (nonatomic, strong) UIColor *segmentBarColor;
 
 /**
  *  By default segmentBar use viewController's title for segment's button title

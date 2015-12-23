@@ -304,6 +304,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
 }
 
+- (void)setSegmentBarColor:(UIColor *)segmentBarColor
+{
+  _segmentBarColor = segmentBarColor;
+  _segmentBar.backgroundColor = _segmentBarColor;
+}
+
 - (void)setIndicatorColor:(UIColor *)indicatorColor
 {
   _indicatorColor = indicatorColor;
@@ -323,6 +329,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   _separatorColor = separatorColor;
   self.separator.backgroundColor = _separatorColor;
 }
+
 
 - (UICollectionViewFlowLayout *)segmentBarLayout
 {
@@ -464,11 +471,16 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
                                                           : floor(destination);
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
+      [self removePreviousViewController];
+
       CGRect itemFrame = [self frameForSegmentItemAtIndex:index];
       frame.origin.x = itemFrame.origin.x;
       self.itemWidth = itemFrame.size.width;
       self.indicatorBgView.frame = frame;
     }
+  }
+  if ([_delegate respondsToSelector:@selector(didSlideSegmentScroll:)]) {
+    [_delegate didSlideSegmentScroll:scrollView];
   }
 }
 
