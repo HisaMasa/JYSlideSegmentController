@@ -478,9 +478,13 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
       self.itemWidth = itemFrame.size.width;
       self.indicatorBgView.frame = frame;
     }
-  }
-  if ([_delegate respondsToSelector:@selector(didSlideSegmentScroll:)]) {
-    [_delegate didSlideSegmentScroll:scrollView];
+    if ([_delegate respondsToSelector:@selector(didSlideViewScroll:)]) {
+      [_delegate didSlideViewScroll:scrollView];
+    }
+  } else if (scrollView == self.segmentBar) {
+    if ([_delegate respondsToSelector:@selector(didSlideSegmentScroll:)]) {
+      [_delegate didSlideSegmentScroll:scrollView];
+    }
   }
 }
 
