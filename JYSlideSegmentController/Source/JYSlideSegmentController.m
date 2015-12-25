@@ -354,11 +354,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   UIViewController *toSelectController = [self.viewControllers objectAtIndex:selectedIndex];
 
   // Add selected view controller as child view controller
+
   if (!toSelectController.parentViewController) {
     [self addChildViewController:toSelectController];
-    CGRect rect = self.slideView.bounds;
-    rect.origin.x = rect.size.width * selectedIndex;
-    toSelectController.view.frame = rect;
+    [self configureViewControllerFrame:toSelectController];
     [self.slideView addSubview:toSelectController.view];
     [toSelectController didMoveToParentViewController:self];
   }
@@ -463,20 +462,13 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
   if (scrollView == self.slideView) {
-    // set indicator frame
-    CGRect frame = self.indicatorBgView.frame;
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
     CGFloat destination = percent * self.viewControllers.count;
     NSInteger index = destination >= self.lastDestination ? ceilf(destination)
                                                           : floor(destination);
+    self.lastDestination = destination;
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
-      [self removePreviousViewController];
-
-      CGRect itemFrame = [self frameForSegmentItemAtIndex:index];
-      frame.origin.x = itemFrame.origin.x;
-      self.itemWidth = itemFrame.size.width;
-      self.indicatorBgView.frame = frame;
     }
     if ([_delegate respondsToSelector:@selector(didSlideViewScroll:)]) {
       [_delegate didSlideViewScroll:scrollView];
@@ -492,8 +484,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (scrollView == self.slideView) {
     [self segmentBarScrollToIndex:_selectedIndex animated:YES];
-    [self removePreviousViewController];
-
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -504,7 +494,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (scrollView == self.slideView) {
     [self segmentBarScrollToIndex:_selectedIndex animated:YES];
-    [self removePreviousViewController];
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -539,6 +528,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
       scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]
              atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally
                      animated:animated];
+
+  CGRect frame = self.indicatorBgView.frame;
+  CGRect itemFrame = [self frameForSegmentItemAtIndex:index];
+  frame.origin.x = itemFrame.origin.x;
+  self.itemWidth = itemFrame.size.width;
+  self.indicatorBgView.frame = frame;
+
+  [self removePreviousViewController];
 }
 
 - (void)removePreviousViewController
