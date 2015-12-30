@@ -442,6 +442,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [self setSelectedIndex:indexPath.row];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
   [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+  [self removePreviousViewController];
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -484,6 +485,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (scrollView == self.slideView) {
     [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+    [self removePreviousViewController];
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -494,6 +496,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (scrollView == self.slideView) {
     [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+    [self removePreviousViewController];
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -525,17 +528,21 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)segmentBarScrollToIndex:(NSInteger)index animated:(BOOL)animated
 {
   [self.segmentBar
-      scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]
-             atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally
-                     animated:animated];
-
+      selectItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]
+                   animated:animated
+             scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
   CGRect frame = self.indicatorBgView.frame;
   CGRect itemFrame = [self frameForSegmentItemAtIndex:index];
   frame.origin.x = itemFrame.origin.x;
   self.itemWidth = itemFrame.size.width;
   self.indicatorBgView.frame = frame;
+}
 
-  [self removePreviousViewController];
+- (void)scrollToItemWithIndex:(NSInteger)index animated:(BOOL)animated
+{
+  [self setSelectedIndex:index];
+  [self scrollToViewWithIndex:self.selectedIndex animated:animated];
+  [self segmentBarScrollToIndex:self.selectedIndex animated:animated];
 }
 
 - (void)removePreviousViewController
@@ -581,8 +588,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
 {
-  NSIndexPath *path = [NSIndexPath indexPathForRow:index inSection:0];
-  UICollectionViewCell *cell = [self.segmentBar cellForItemAtIndexPath:path];
-  return cell.frame;
+  NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+  UICollectionViewLayoutAttributes *attributes =
+      [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
+  CGRect cellRect = attributes.frame;
+  return cellRect;
 }
 @end

@@ -95,5 +95,6 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
                              startIndex:(NSInteger)startIndex;
 
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated;
+- (void)scrollToItemWithIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
