@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B76AFD671C36E89100935120 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B76AFD661C36E89100935120 /* LaunchScreen.storyboard */; };
 		E12DF8DF18E94BFC006B8543 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8DE18E94BFC006B8543 /* Foundation.framework */; };
 		E12DF8E118E94BFC006B8543 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8E018E94BFC006B8543 /* CoreGraphics.framework */; };
 		E12DF8E318E94BFC006B8543 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8E218E94BFC006B8543 /* UIKit.framework */; };
@@ -33,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B76AFD661C36E89100935120 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E12DF8DB18E94BFC006B8543 /* JYSlideSegmentController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JYSlideSegmentController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12DF8DE18E94BFC006B8543 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E12DF8E018E94BFC006B8543 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -161,6 +163,7 @@
 			children = (
 				E15A7BF018EA9FD700BD23E5 /* AppDelegate.h */,
 				E15A7BF118EA9FD700BD23E5 /* AppDelegate.m */,
+				B76AFD661C36E89100935120 /* LaunchScreen.storyboard */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -241,6 +244,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B76AFD671C36E89100935120 /* LaunchScreen.storyboard in Resources */,
 				E12DF8FA18E94BFC006B8543 /* Images.xcassets in Resources */,
 				E12DF8E918E94BFC006B8543 /* InfoPlist.strings in Resources */,
 			);

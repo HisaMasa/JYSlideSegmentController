@@ -39,8 +39,8 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (void)didSelectViewController:(UIViewController *)viewController;
 - (void)didFullyShowViewController:(UIViewController *)viewController;
 - (BOOL)shouldSelectViewController:(UIViewController *)viewController;
-- (void)didSlideSegmentScroll:(UIScrollView *)segmentBar;
-- (void)didSlideViewScroll:(UIScrollView *)slideView;
+- (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
+- (void)slideViewDidScroll:(UIScrollView *)slideView;
 @end
 
 @protocol JYSlideViewDelegate <NSObject>
@@ -64,6 +64,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
  *  Child viewControllers of SlideSegmentController
  */
 @property (nonatomic, copy) NSArray *viewControllers;
+@property (nonatomic, assign, readwrite) NSInteger startIndex;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) JYSlideView *slideView;
@@ -95,6 +96,5 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
                              startIndex:(NSInteger)startIndex;
 
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated;
-- (void)scrollToItemWithIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end

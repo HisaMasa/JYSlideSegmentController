@@ -88,11 +88,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 @property (nonatomic, strong, readwrite) JYSlideView *slideView;
 @property (nonatomic, assign, readwrite) NSInteger selectedIndex;
 @property (nonatomic, assign, readwrite) NSInteger previousIndex;
-@property (nonatomic, assign, readwrite) NSInteger startIndex;
 @property (nonatomic, assign, readwrite) CGFloat lastDestination;
 @property (nonatomic, strong) UIView *indicator;
 @property (nonatomic, strong) UIView *indicatorBgView;
 @property (nonatomic, strong) UIView *separator;
+@property (nonatomic, assign) CGRect currentIndicatorFrame;
+@property (nonatomic, assign) CGFloat segmentBarRightPadding;
 
 @property (nonatomic, strong) UICollectionViewFlowLayout *segmentBarLayout;
 
@@ -112,6 +113,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   if (self) {
     _viewControllers = [viewControllers copy];
     _selectedIndex = NSNotFound;
+    _startIndex = 0;
   }
   return self;
 }
@@ -136,7 +138,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
   [self setupSubviews];
   [self setSelectedIndex:self.startIndex];
-  [self scrollToViewWithIndex:self.startIndex animated:NO];
+  [self segmentBarScrollToIndex:self.startIndex animated:NO];
+
   [[NSNotificationCenter defaultCenter]
       addObserver:self
          selector:@selector(handleOrientationDidChangeNotification:)
@@ -149,6 +152,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [super viewDidAppear:animated];
   CGSize conentSize = CGSizeMake(_slideView.bounds.size.width * self.viewControllers.count, 0);
   [_slideView setContentSize:conentSize];
+  _segmentBarRightPadding = CGRectGetWidth(self.view.frame) - self.segmentBarWidth;
 }
 
 - (void)viewDidLayoutSubviews
@@ -368,6 +372,11 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
 }
 
+- (void)setStartIndex:(NSInteger)startIndex
+{
+  _startIndex = startIndex;
+}
+
 - (void)setViewControllers:(NSArray *)viewControllers
 {
   // Need remove previous viewControllers
@@ -460,25 +469,67 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 }
 
 #pragma mark - UIScrollViewDelegate
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
   if (scrollView == self.slideView) {
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
     CGFloat destination = percent * self.viewControllers.count;
     NSInteger index = destination >= self.lastDestination ? ceilf(destination)
                                                           : floor(destination);
-    self.lastDestination = destination;
+    CGRect frame = self.currentIndicatorFrame;
+
+    CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0,
+                                       self.itemWidth, self.indicatorHeight);
+    CGFloat segmentBarPercent =
+        fmodf(scrollView.contentOffset.x, CGRectGetWidth(self.view.frame)) /
+        CGRectGetWidth(self.view.frame);
+
+    CGPoint translation = [scrollView.panGestureRecognizer translationInView:scrollView.superview];
+
+    if (segmentBarPercent == 0.f) {
+      NSInteger currentIndex = scrollView.contentOffset.x / CGRectGetWidth(self.view.frame);
+      CGRect cellFrame = [self frameForSegmentItemAtIndex:currentIndex];
+      frame.origin.x = cellFrame.origin.x;
+      frame.size.width = CGRectGetWidth(cellFrame);
+      self.itemWidth = CGRectGetWidth(cellFrame);
+    } else {
+      if (translation.x > 0) {
+        CGRect destItemFrame = [self frameForSegmentItemAtIndex:(ceilf(destination) - 1)];
+        CGRect srcItemFrame = [self frameForSegmentItemAtIndex:ceilf(destination)];
+        frame.origin.x -= (1 - segmentBarPercent) * CGRectGetWidth(destItemFrame);
+        frame.size.width +=
+            (1 - segmentBarPercent) *
+            (CGRectGetWidth(destItemFrame) - CGRectGetWidth(srcItemFrame));
+      } else {
+        CGRect destItemFrame = [self frameForSegmentItemAtIndex:(floor(destination) + 1)];
+        CGRect srcItemFrame = [self frameForSegmentItemAtIndex:floor(destination)];
+        frame.origin.x += segmentBarPercent * srcItemFrame.size.width;
+        frame.size.width += segmentBarPercent * (CGRectGetWidth(destItemFrame) -
+                                                 CGRectGetWidth(srcItemFrame));
+      }
+    }
+    indicatorFrame.size.width = frame.size.width - self.indicatorInsets.left -
+                                self.indicatorInsets.right;
+    self.indicatorBgView.frame = frame;
+    self.indicator.frame = indicatorFrame;
+
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
     }
-    if ([_delegate respondsToSelector:@selector(didSlideViewScroll:)]) {
-      [_delegate didSlideViewScroll:scrollView];
+    self.lastDestination = destination;
+
+    if ([_delegate respondsToSelector:@selector(slideViewDidScroll:)]) {
+      [_delegate slideViewDidScroll:scrollView];
     }
   } else if (scrollView == self.segmentBar) {
-    if ([_delegate respondsToSelector:@selector(didSlideSegmentScroll:)]) {
-      [_delegate didSlideSegmentScroll:scrollView];
+    if ([_delegate respondsToSelector:@selector(slideSegmentDidScroll:)]) {
+      [_delegate slideSegmentDidScroll:scrollView];
     }
   }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+  self.currentIndicatorFrame = self.indicatorBgView.frame;
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
@@ -509,6 +560,11 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   CGRect rect = self.slideView.bounds;
   rect.origin.x = rect.size.width * index;
   [self.slideView setContentOffset:CGPointMake(rect.origin.x, rect.origin.y) animated:animated];
+  if (!animated) {
+    [self segmentBarScrollToIndex:index animated:NO];
+    [self.view setNeedsLayout];
+    [self.view layoutIfNeeded];
+  }
   if (!animated && [_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
     [_delegate didFullyShowViewController:self.selectedViewController];
   }
@@ -519,10 +575,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   _selectedIndex = NSNotFound;
   _previousIndex = NSNotFound;
 
-  [self setSelectedIndex:0];
-  [self scrollToViewWithIndex:0 animated:NO];
-  [self segmentBarScrollToIndex:0 animated:NO];
   [self.segmentBar reloadData];
+  
+  CGSize conentSize = CGSizeMake(_slideView.bounds.size.width * self.viewControllers.count, 0);
+  [_slideView setContentSize:conentSize];
+
+  [self setSelectedIndex:self.startIndex];
+  [self scrollToViewWithIndex:self.startIndex animated:NO];
+  [self segmentBarScrollToIndex:self.startIndex animated:NO];
 }
 
 - (void)segmentBarScrollToIndex:(NSInteger)index animated:(BOOL)animated
@@ -531,11 +591,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
       selectItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]
                    animated:animated
              scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
-  CGRect frame = self.indicatorBgView.frame;
-  CGRect itemFrame = [self frameForSegmentItemAtIndex:index];
-  frame.origin.x = itemFrame.origin.x;
-  self.itemWidth = itemFrame.size.width;
-  self.indicatorBgView.frame = frame;
 }
 
 - (void)scrollToItemWithIndex:(NSInteger)index animated:(BOOL)animated
@@ -582,16 +637,27 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   CGSize conentSize = CGSizeMake(
       _slideView.bounds.size.width * self.viewControllers.count, 0);
   [_slideView setContentSize:conentSize];
+  CGRect frame = self.segmentBar.frame;
+  if (UIDeviceOrientationIsLandscape([UIDevice currentDevice].orientation)) {
+    frame.size.width =
+        CGRectGetWidth(self.view.frame) - self.segmentBarRightPadding;
+  } else {
+    frame.size.width = self.segmentBarWidth;
+  }
+  self.segmentBar.frame = frame;
+  [self.segmentBar reloadData];
+  [self.segmentBar setNeedsLayout];
+  [self.segmentBar layoutIfNeeded];
   [self configureViewControllerFrame:self.selectedViewController];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
 }
 
 - (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
 {
+  NSParameterAssert(index >= 0 && index < self.viewControllers.count);
   NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-  UICollectionViewLayoutAttributes *attributes =
-      [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
-  CGRect cellRect = attributes.frame;
-  return cellRect;
+  UICollectionViewCell *cell =
+      [self.segmentBar cellForItemAtIndexPath:indexPath];
+  return cell.frame;
 }
 @end
