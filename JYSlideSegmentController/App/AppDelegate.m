@@ -56,6 +56,7 @@
     }
     [vcs addObject:vc];
   }
+  self.slideSegmentController.startIndex = 0;
   self.slideSegmentController.viewControllers = vcs;
   _changeFlag = !_changeFlag;
 }

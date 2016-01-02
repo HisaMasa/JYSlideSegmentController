@@ -28,6 +28,7 @@ extern NSString *const segmentBarItemID;
                 layout:(UICollectionViewLayout *)segmentBarViewLayout
 sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+
 @optional
 - (NSInteger)numberOfSectionsInslideSegment:(UICollectionView *)segmentBar;
 
@@ -38,6 +39,8 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (void)didSelectViewController:(UIViewController *)viewController;
 - (void)didFullyShowViewController:(UIViewController *)viewController;
 - (BOOL)shouldSelectViewController:(UIViewController *)viewController;
+- (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
+- (void)slideViewDidScroll:(UIScrollView *)slideView;
 @end
 
 @protocol JYSlideViewDelegate <NSObject>
@@ -61,6 +64,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
  *  Child viewControllers of SlideSegmentController
  */
 @property (nonatomic, copy) NSArray *viewControllers;
+@property (nonatomic, assign, readwrite) NSInteger startIndex;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) JYSlideView *slideView;
@@ -73,10 +77,12 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
  */
 @property (nonatomic, assign) CGFloat itemWidth;
 @property (nonatomic, assign) CGFloat segmentBarWidth;
+@property (nonatomic, assign) CGFloat segmentBarHeight;
 @property (nonatomic, strong) UIColor *indicatorColor;
 @property (nonatomic, assign) CGFloat indicatorHeight;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 @property (nonatomic, strong) UIColor *separatorColor;
+@property (nonatomic, strong) UIColor *segmentBarColor;
 
 /**
  *  By default segmentBar use viewController's title for segment's button title
