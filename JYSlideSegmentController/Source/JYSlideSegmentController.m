@@ -47,6 +47,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 @end
 
+@interface JYSlideView()
+
+@property (nonatomic, assign) BOOL scrollingLocked;
+
+@end
+
 @implementation JYSlideView
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
@@ -93,7 +99,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 @property (nonatomic, strong) UIView *indicatorBgView;
 @property (nonatomic, strong) UIView *separator;
 @property (nonatomic, assign) CGRect currentIndicatorFrame;
-@property (nonatomic, assign) CGFloat segmentBarRightPadding;
 
 @property (nonatomic, strong) UICollectionViewFlowLayout *segmentBarLayout;
 
@@ -152,22 +157,23 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [super viewDidAppear:animated];
   CGSize conentSize = CGSizeMake(_slideView.bounds.size.width * self.viewControllers.count, 0);
   [_slideView setContentSize:conentSize];
-  _segmentBarRightPadding = CGRectGetWidth(self.view.frame) - self.segmentBarWidth;
 }
 
 - (void)viewDidLayoutSubviews
 {
   [super viewDidLayoutSubviews];
+  [self.segmentBar setNeedsLayout];
+  [self.segmentBar layoutIfNeeded];
   CGRect itemFrame = [self frameForSegmentItemAtIndex:self.selectedIndex];
   CGRect frame = CGRectMake(itemFrame.origin.x,
                             self.segmentBar.frame.size.height - self.indicatorHeight,
-                            self.itemWidth, self.indicatorHeight);
+                            itemFrame.size.width, self.indicatorHeight);
   self.indicatorBgView.frame = frame;
-  CGFloat indicatorWidth = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
+  CGFloat indicatorWidth = itemFrame.size.width - self.indicatorInsets.left - self.indicatorInsets.right;
   CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, self.indicatorHeight);
   self.indicator.frame = indicatorFrame;
   CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
-                                     CGRectGetWidth(self.segmentBar.frame), 1);
+                                     CGRectGetWidth(self.segmentBar.frame), self.separatorHeight);
   self.separator.frame = separatorFrame;
 
   [self configureViewControllerFrame:self.selectedViewController];
@@ -212,6 +218,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     frame.origin.y = CGRectGetMaxY(_segmentBar.frame);
     _slideView = [[JYSlideView alloc] initWithFrame:frame];
     _slideView.scrollEnabled = self.viewControllers.count > 1 ? YES : NO;
+    _slideView.scrollingLocked = NO;
     [_slideView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth
                                      | UIViewAutoresizingFlexibleHeight)];
     [_slideView setShowsHorizontalScrollIndicator:NO];
@@ -228,7 +235,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   if (!_segmentBar) {
     CGRect frame = self.view.bounds;
     frame.size.height = self.segmentBarHeight;
-    frame.size.width = self.segmentBarWidth;
     _segmentBar = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:self.segmentBarLayout];
     _segmentBar.backgroundColor = [UIColor whiteColor];
     _segmentBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -274,20 +280,20 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   return _indicatorHeight;
 }
 
-- (CGFloat)segmentBarWidth
-{
-  if (!_segmentBarWidth) {
-    _segmentBarWidth = self.view.bounds.size.width;
-  }
-  return _segmentBarWidth;
-}
-
 - (CGFloat)segmentBarHeight
 {
   if (!_segmentBarHeight) {
     _segmentBarHeight = 40;
   }
   return _segmentBarHeight;
+}
+
+- (CGFloat)separatorHeight
+{
+    if (!_separatorHeight) {
+        _separatorHeight = 1.f;
+    }
+    return _separatorHeight;
 }
 
 - (CGFloat)itemWidth
@@ -339,7 +345,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   if (!_segmentBarLayout) {
     _segmentBarLayout = [[UICollectionViewFlowLayout alloc] init];
-    _segmentBarLayout.sectionInset = UIEdgeInsetsZero;
+    _segmentBarLayout.sectionInset = self.segmentBarInsets;
     _segmentBarLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _segmentBarLayout.minimumLineSpacing = 0;
     _segmentBarLayout.minimumInteritemSpacing = 0;
@@ -471,6 +477,9 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 #pragma mark - UIScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
   if (scrollView == self.slideView) {
+    if (self.slideView.scrollingLocked) {
+      return;
+    }
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
     CGFloat destination = percent * self.viewControllers.count;
     NSInteger index = destination >= self.lastDestination ? ceilf(destination)
@@ -634,17 +643,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (void)handleOrientationDidChangeNotification:(NSNotification *)notification
 {
+  //don't trigger scrollViewDidScroll when set scroll contentSize
+  self.slideView.scrollingLocked = YES;
   CGSize conentSize = CGSizeMake(
       _slideView.bounds.size.width * self.viewControllers.count, 0);
   [_slideView setContentSize:conentSize];
-  CGRect frame = self.segmentBar.frame;
-  if (UIDeviceOrientationIsLandscape([UIDevice currentDevice].orientation)) {
-    frame.size.width =
-        CGRectGetWidth(self.view.frame) - self.segmentBarRightPadding;
-  } else {
-    frame.size.width = self.segmentBarWidth;
-  }
-  self.segmentBar.frame = frame;
+  self.slideView.scrollingLocked = NO;
   [self.segmentBar reloadData];
   [self.segmentBar setNeedsLayout];
   [self.segmentBar layoutIfNeeded];

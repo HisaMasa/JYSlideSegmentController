@@ -76,13 +76,14 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
  *  Custom UI
  */
 @property (nonatomic, assign) CGFloat itemWidth;
-@property (nonatomic, assign) CGFloat segmentBarWidth;
 @property (nonatomic, assign) CGFloat segmentBarHeight;
 @property (nonatomic, strong) UIColor *indicatorColor;
 @property (nonatomic, assign) CGFloat indicatorHeight;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 @property (nonatomic, strong) UIColor *separatorColor;
 @property (nonatomic, strong) UIColor *segmentBarColor;
+@property (nonatomic, assign) UIEdgeInsets segmentBarInsets;
+@property (nonatomic, assign) CGFloat separatorHeight;
 
 /**
  *  By default segmentBar use viewController's title for segment's button title
