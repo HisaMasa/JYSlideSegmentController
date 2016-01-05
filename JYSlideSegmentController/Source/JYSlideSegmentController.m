@@ -49,7 +49,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 @interface JYSlideView()
 
-@property (nonatomic, assign) BOOL scrollingLocked;
+//don't trigger scrollViewDidScroll when scrollContentSizeResizing = YES
+@property (nonatomic, assign) BOOL scrollContentSizeResizing;
 
 @end
 
@@ -218,7 +219,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     frame.origin.y = CGRectGetMaxY(_segmentBar.frame);
     _slideView = [[JYSlideView alloc] initWithFrame:frame];
     _slideView.scrollEnabled = self.viewControllers.count > 1 ? YES : NO;
-    _slideView.scrollingLocked = NO;
+    _slideView.scrollContentSizeResizing = NO;
     [_slideView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth
                                      | UIViewAutoresizingFlexibleHeight)];
     [_slideView setShowsHorizontalScrollIndicator:NO];
@@ -477,7 +478,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 #pragma mark - UIScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
   if (scrollView == self.slideView) {
-    if (self.slideView.scrollingLocked) {
+    if (self.slideView.scrollContentSizeResizing) {
       return;
     }
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
@@ -643,12 +644,11 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (void)handleOrientationDidChangeNotification:(NSNotification *)notification
 {
-  //don't trigger scrollViewDidScroll when set scroll contentSize
-  self.slideView.scrollingLocked = YES;
+  self.slideView.scrollContentSizeResizing = YES;
   CGSize conentSize = CGSizeMake(
       _slideView.bounds.size.width * self.viewControllers.count, 0);
   [_slideView setContentSize:conentSize];
-  self.slideView.scrollingLocked = NO;
+  self.slideView.scrollContentSizeResizing = NO;
   [self.segmentBar reloadData];
   [self.segmentBar setNeedsLayout];
   [self.segmentBar layoutIfNeeded];
