@@ -163,8 +163,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)viewDidLayoutSubviews
 {
   [super viewDidLayoutSubviews];
-  [self.segmentBar setNeedsLayout];
-  [self.segmentBar layoutIfNeeded];
   CGRect itemFrame = [self frameForSegmentItemAtIndex:self.selectedIndex];
   CGRect frame = CGRectMake(itemFrame.origin.x,
                             self.segmentBar.frame.size.height - self.indicatorHeight,
@@ -572,8 +570,6 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [self.slideView setContentOffset:CGPointMake(rect.origin.x, rect.origin.y) animated:animated];
   if (!animated) {
     [self segmentBarScrollToIndex:index animated:NO];
-    [self.view setNeedsLayout];
-    [self.view layoutIfNeeded];
   }
   if (!animated && [_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
     [_delegate didFullyShowViewController:self.selectedViewController];
@@ -660,8 +656,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   NSParameterAssert(index >= 0 && index < self.viewControllers.count);
   NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-  UICollectionViewCell *cell =
-      [self.segmentBar cellForItemAtIndexPath:indexPath];
-  return cell.frame;
+  UICollectionViewLayoutAttributes *attributes = [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
+  return attributes.frame;
 }
 @end
