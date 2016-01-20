@@ -218,6 +218,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _slideView = [[JYSlideView alloc] initWithFrame:frame];
     _slideView.scrollEnabled = self.viewControllers.count > 1 ? YES : NO;
     _slideView.scrollContentSizeResizing = NO;
+    _slideView.scrollsToTop = NO;
     [_slideView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth
                                      | UIViewAutoresizingFlexibleHeight)];
     [_slideView setShowsHorizontalScrollIndicator:NO];
