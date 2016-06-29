@@ -103,6 +103,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 @property (nonatomic, strong) UICollectionViewFlowLayout *segmentBarLayout;
 
+@property (nonatomic, assign, getter=isFirstShow) BOOL firstShow;
+
 
 - (void)reset;
 
@@ -120,6 +122,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _viewControllers = [viewControllers copy];
     _selectedIndex = NSNotFound;
     _startIndex = 0;
+    _firstShow = YES;
   }
   return self;
 }
@@ -134,6 +137,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _selectedIndex = NSNotFound;
     _previousIndex = NSNotFound;
     _startIndex = startIndex;
+    _firstShow = YES;
   }
   return self;
 }
@@ -143,9 +147,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [super viewDidLoad];
 
   [self setupSubviews];
-  [self setSelectedIndex:self.startIndex];
-  [self segmentBarScrollToIndex:self.startIndex animated:NO];
-
+  
   [[NSNotificationCenter defaultCenter]
       addObserver:self
          selector:@selector(handleOrientationDidChangeNotification:)
@@ -153,16 +155,24 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
            object:nil];
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
-  [super viewDidAppear:animated];
-  CGSize conentSize = CGSizeMake(_slideView.bounds.size.width * self.viewControllers.count, 0);
-  [_slideView setContentSize:conentSize];
+  [super viewWillAppear:animated];
+  if (self.isFirstShow) {
+    [self adjustContentSize];
+    [self setSelectedIndex:self.startIndex];
+    [self scrollToViewWithIndex:self.startIndex animated:NO];
+    [self segmentBarScrollToIndex:self.startIndex animated:NO];
+    self.firstShow = NO;
+  }
 }
 
 - (void)viewDidLayoutSubviews
 {
   [super viewDidLayoutSubviews];
+  
+  [self adjustContentSize];
+  
   CGRect itemFrame = [self frameForSegmentItemAtIndex:self.selectedIndex];
   CGRect frame = CGRectMake(itemFrame.origin.x,
                             self.segmentBar.frame.size.height - self.indicatorHeight,
@@ -615,7 +625,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     return;
   }
   UIViewController *previousViewController =
-      self.viewControllers[self.previousIndex];
+  self.viewControllers[self.previousIndex];
   if (previousViewController && previousViewController.parentViewController) {
     [previousViewController willMoveToParentViewController:nil];
     [previousViewController.view removeFromSuperview];
@@ -633,8 +643,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     CGRect rect = self.slideView.bounds;
     rect.origin.x = rect.size.width * index;
     rect.origin.y = 0;
-    rect.size.height -=
-        self.slideView.contentInset.top + self.slideView.contentInset.bottom;
+    rect.size.height -= self.slideView.contentInset.top + self.slideView.contentInset.bottom;
     vc.view.frame = rect;
   }
 }
@@ -642,9 +651,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)handleOrientationDidChangeNotification:(NSNotification *)notification
 {
   self.slideView.scrollContentSizeResizing = YES;
-  CGSize conentSize = CGSizeMake(
-      _slideView.bounds.size.width * self.viewControllers.count, 0);
-  [_slideView setContentSize:conentSize];
+  [self adjustContentSize];
   self.slideView.scrollContentSizeResizing = NO;
   [self.segmentBar reloadData];
   [self.segmentBar setNeedsLayout];
@@ -660,4 +667,11 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   UICollectionViewLayoutAttributes *attributes = [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
   return attributes.frame;
 }
+
+- (void)adjustContentSize
+{
+  CGSize conentSize = CGSizeMake(_slideView.bounds.size.width * self.viewControllers.count, 0);
+  [_slideView setContentSize:conentSize];
+}
+
 @end
