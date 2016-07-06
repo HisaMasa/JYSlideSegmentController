@@ -397,8 +397,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 {
   // Need remove previous viewControllers
   for (UIViewController *vc in _viewControllers) {
-    [vc willMoveToParentViewController:nil];
-    [vc removeFromParentViewController];
+      [vc willMoveToParentViewController:nil];
+      [vc.view removeFromSuperview];
+      [vc removeFromParentViewController];
+      [vc didMoveToParentViewController:nil];
   }
   _viewControllers = [viewControllers copy];
   [self reset];
