@@ -652,14 +652,17 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (void)handleOrientationDidChangeNotification:(NSNotification *)notification
 {
-  self.slideView.scrollContentSizeResizing = YES;
-  [self adjustContentSize];
-  self.slideView.scrollContentSizeResizing = NO;
-  [self.segmentBar reloadData];
-  [self.segmentBar setNeedsLayout];
-  [self.segmentBar layoutIfNeeded];
-  [self configureViewControllerFrame:self.selectedViewController];
-  [self scrollToViewWithIndex:self.selectedIndex animated:NO];
+    if (self.selectedIndex == NSNotFound) {
+        return;
+    }
+    self.slideView.scrollContentSizeResizing = YES;
+    [self adjustContentSize];
+    self.slideView.scrollContentSizeResizing = NO;
+    [self.segmentBar reloadData];
+    [self.segmentBar setNeedsLayout];
+    [self.segmentBar layoutIfNeeded];
+    [self configureViewControllerFrame:self.selectedViewController];
+    [self scrollToViewWithIndex:self.selectedIndex animated:NO];
 }
 
 - (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
