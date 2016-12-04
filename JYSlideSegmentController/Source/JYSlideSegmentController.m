@@ -117,7 +117,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
 {
-  self = [super init];
+  self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _viewControllers = [viewControllers copy];
     _selectedIndex = NSNotFound;
@@ -131,7 +131,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
                              startIndex:(NSInteger)startIndex
 {
   NSParameterAssert(startIndex < viewControllers.count);
-  self = [super init];
+  self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _viewControllers = [viewControllers copy];
     _selectedIndex = NSNotFound;
