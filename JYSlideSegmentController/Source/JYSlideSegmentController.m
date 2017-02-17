@@ -105,6 +105,8 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 @property (nonatomic, assign, getter=isFirstShow) BOOL firstShow;
 
+@property (nonatomic, assign) BOOL orientationDidChanged;
+
 
 - (void)reset;
 
@@ -170,9 +172,16 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)viewDidLayoutSubviews
 {
   [super viewDidLayoutSubviews];
-  
+
   [self adjustContentSize];
-  
+  if (self.orientationDidChanged) {
+    [self.segmentBar reloadData];
+    [self.segmentBar setNeedsLayout];
+    [self.segmentBar layoutIfNeeded];
+    [self scrollToViewWithIndex:self.selectedIndex animated:NO];
+    self.orientationDidChanged = NO;
+  }
+
   CGRect itemFrame = [self frameForSegmentItemAtIndex:self.selectedIndex];
   CGRect frame = CGRectMake(itemFrame.origin.x,
                             self.segmentBar.frame.size.height - self.indicatorHeight,
@@ -489,9 +498,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 #pragma mark - UIScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
   if (scrollView == self.slideView) {
-    if (self.slideView.scrollContentSizeResizing) {
+    if (self.slideView.scrollContentSizeResizing || self.orientationDidChanged) {
       return;
     }
+
     CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
     CGFloat destination = percent * self.viewControllers.count;
     NSInteger index = destination >= self.lastDestination ? ceilf(destination)
@@ -652,17 +662,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (void)handleOrientationDidChangeNotification:(NSNotification *)notification
 {
-    if (self.selectedIndex == NSNotFound) {
-        return;
-    }
-    self.slideView.scrollContentSizeResizing = YES;
-    [self adjustContentSize];
-    self.slideView.scrollContentSizeResizing = NO;
-    [self.segmentBar reloadData];
-    [self.segmentBar setNeedsLayout];
-    [self.segmentBar layoutIfNeeded];
-    [self configureViewControllerFrame:self.selectedViewController];
-    [self scrollToViewWithIndex:self.selectedIndex animated:NO];
+  self.orientationDidChanged = YES;
 }
 
 - (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
