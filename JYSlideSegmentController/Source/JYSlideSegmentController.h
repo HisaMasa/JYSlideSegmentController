@@ -96,6 +96,23 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
                              startIndex:(NSInteger)startIndex;
 
+
+/**
+ Scroll to item, will scroll the view / indicator ,and change the selected item
+ Indicator always scrolled animated
+
+ @param index the index of item
+ @param animated view scroll animated
+ */
+- (void)scrollToItemWithIndex:(NSInteger)index animated:(BOOL)animated;
+
+
+/**
+ Scroll the view and indicator, but can't change the selected item
+ 
+ @param index the index of view
+ @param animated view scroll animated
+ */
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end

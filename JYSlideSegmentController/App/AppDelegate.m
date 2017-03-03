@@ -20,11 +20,25 @@
   for (int i = 0; i < 5; i++) {
     UIViewController *vc = [[UIViewController alloc] init];
     vc.title = [NSString stringWithFormat:@"%d", i];
-    if (i % 2 == 0) {
-      vc.view.backgroundColor = [UIColor blueColor];
-    } else {
-      vc.view.backgroundColor = [UIColor redColor];
+    UIColor *color;
+    switch (i) {
+      case 0:
+        color  = [UIColor blueColor];
+        break;
+      case 1:
+        color = [UIColor redColor];
+        break;
+      case 2:
+        color = [UIColor grayColor];
+        break;
+      case 4:
+        color = [UIColor blackColor];
+        break;
+      default:
+        color = [UIColor whiteColor];
+        break;
     }
+    vc.view.backgroundColor = color;
     [vcs addObject:vc];
   }
   self.slideSegmentController = [[JYSlideSegmentController alloc] initWithViewControllers:vcs];
