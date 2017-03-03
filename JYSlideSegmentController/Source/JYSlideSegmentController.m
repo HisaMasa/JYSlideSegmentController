@@ -183,6 +183,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     self.orientationDidChanged = NO;
   }
 
+  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
+                                     CGRectGetWidth(self.segmentBar.frame), self.separatorHeight);
+  self.separator.frame = separatorFrame;
+
   [self configureViewControllerFrame:self.selectedViewController];
   // workaround for 7.x iPad
   if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad &&
