@@ -285,6 +285,12 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   return _indicatorHeight;
 }
 
+- (void)setIndicatorHeight:(CGFloat)indicatorHeight
+{
+  _indicatorHeight = indicatorHeight;
+  [self.indicatorBgView setNeedsLayout];
+}
+
 - (CGFloat)segmentBarHeight
 {
   if (!_segmentBarHeight) {
@@ -295,10 +301,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (CGFloat)separatorHeight
 {
-    if (!_separatorHeight) {
-        _separatorHeight = 1.f;
-    }
-    return _separatorHeight;
+  if (!_separatorHeight) {
+    _separatorHeight = 1.f;
+  }
+  return _separatorHeight;
 }
 
 - (CGFloat)itemWidth
@@ -486,44 +492,43 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     NSInteger index = destination >= self.lastDestination ? ceilf(destination)
                                                           : floor(destination);
     CGRect frame = self.currentIndicatorFrame;
-    if (frame.size.width == 0) {
-      frame = self.indicatorBgView.frame;
-    }
+    // Set indicatorBgView.frame when draging
+    if (frame.size.width > 0) {
+      CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0,
+                                         self.itemWidth, self.indicatorHeight);
+      CGFloat segmentBarPercent =
+      fmodf(scrollView.contentOffset.x, CGRectGetWidth(self.view.frame)) /
+      CGRectGetWidth(self.view.frame);
 
-    CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0,
-                                       self.itemWidth, self.indicatorHeight);
-    CGFloat segmentBarPercent =
-        fmodf(scrollView.contentOffset.x, CGRectGetWidth(self.view.frame)) /
-        CGRectGetWidth(self.view.frame);
+      CGPoint translation = [scrollView.panGestureRecognizer translationInView:scrollView.superview];
 
-    CGPoint translation = [scrollView.panGestureRecognizer translationInView:scrollView.superview];
-
-    if (segmentBarPercent == 0.f) {
-      NSInteger currentIndex = scrollView.contentOffset.x / CGRectGetWidth(self.view.frame);
-      CGRect cellFrame = [self frameForSegmentItemAtIndex:currentIndex];
-      frame.origin.x = cellFrame.origin.x;
-      frame.size.width = CGRectGetWidth(cellFrame);
-      self.itemWidth = CGRectGetWidth(cellFrame);
-    } else {
-      if (translation.x > 0) {
-        CGRect destItemFrame = [self frameForSegmentItemAtIndex:(ceilf(destination) - 1)];
-        CGRect srcItemFrame = [self frameForSegmentItemAtIndex:ceilf(destination)];
-        frame.origin.x -= (1 - segmentBarPercent) * CGRectGetWidth(destItemFrame);
-        frame.size.width +=
-            (1 - segmentBarPercent) *
-            (CGRectGetWidth(destItemFrame) - CGRectGetWidth(srcItemFrame));
+      if (segmentBarPercent == 0.f) {
+        NSInteger currentIndex = scrollView.contentOffset.x / CGRectGetWidth(self.view.frame);
+        CGRect cellFrame = [self frameForSegmentItemAtIndex:currentIndex];
+        frame.origin.x = cellFrame.origin.x;
+        frame.size.width = CGRectGetWidth(cellFrame);
+        self.itemWidth = CGRectGetWidth(cellFrame);
       } else {
-        CGRect destItemFrame = [self frameForSegmentItemAtIndex:(floor(destination) + 1)];
-        CGRect srcItemFrame = [self frameForSegmentItemAtIndex:floor(destination)];
-        frame.origin.x += segmentBarPercent * srcItemFrame.size.width;
-        frame.size.width += segmentBarPercent * (CGRectGetWidth(destItemFrame) -
-                                                 CGRectGetWidth(srcItemFrame));
+        if (translation.x > 0) {
+          CGRect destItemFrame = [self frameForSegmentItemAtIndex:(ceilf(destination) - 1)];
+          CGRect srcItemFrame = [self frameForSegmentItemAtIndex:ceilf(destination)];
+          frame.origin.x -= (1 - segmentBarPercent) * CGRectGetWidth(destItemFrame);
+          frame.size.width +=
+          (1 - segmentBarPercent) *
+          (CGRectGetWidth(destItemFrame) - CGRectGetWidth(srcItemFrame));
+        } else {
+          CGRect destItemFrame = [self frameForSegmentItemAtIndex:(floor(destination) + 1)];
+          CGRect srcItemFrame = [self frameForSegmentItemAtIndex:floor(destination)];
+          frame.origin.x += segmentBarPercent * srcItemFrame.size.width;
+          frame.size.width += segmentBarPercent * (CGRectGetWidth(destItemFrame) -
+                                                   CGRectGetWidth(srcItemFrame));
+        }
       }
+      indicatorFrame.size.width = frame.size.width - self.indicatorInsets.left -
+      self.indicatorInsets.right;
+      self.indicatorBgView.frame = frame;
+      self.indicator.frame = indicatorFrame;
     }
-    indicatorFrame.size.width = frame.size.width - self.indicatorInsets.left -
-                                self.indicatorInsets.right;
-    self.indicatorBgView.frame = frame;
-    self.indicator.frame = indicatorFrame;
 
     if (index >= 0 && index < self.viewControllers.count) {
       [self setSelectedIndex:index];
@@ -550,6 +555,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   if (scrollView == self.slideView) {
     [self segmentBarScrollToIndex:_selectedIndex animated:YES];
     [self removePreviousViewController];
+    self.currentIndicatorFrame = CGRectZero;
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -561,6 +567,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   if (scrollView == self.slideView) {
     [self segmentBarScrollToIndex:_selectedIndex animated:YES];
     [self removePreviousViewController];
+    self.currentIndicatorFrame = CGRectZero;
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
