@@ -116,6 +116,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 @synthesize viewControllers = _viewControllers;
 @synthesize itemWidth = _itemWidth;
 @synthesize separatorColor = _separatorColor;
+@synthesize indicatorHeight = _indicatorHeight;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
 {
@@ -288,7 +289,17 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (void)setIndicatorHeight:(CGFloat)indicatorHeight
 {
   _indicatorHeight = indicatorHeight;
-  [self.indicatorBgView setNeedsLayout];
+  CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - self.indicatorHeight,
+                            self.itemWidth, self.indicatorHeight);
+  self.indicatorBgView.frame = frame;
+}
+
+- (void)setIndicatorInsets:(UIEdgeInsets)indicatorInsets
+{
+  _indicatorInsets = indicatorInsets;
+  CGFloat width = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
+  CGRect frame = CGRectMake(self.indicatorInsets.left, 0, width, self.indicatorHeight);
+  self.indicator.frame = frame;
 }
 
 - (CGFloat)segmentBarHeight
