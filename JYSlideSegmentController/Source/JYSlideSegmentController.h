@@ -96,6 +96,22 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
                              startIndex:(NSInteger)startIndex;
 
+
+/**
+ 将所有页面和状态都滚动到传入的index，包括slideView、indicator、segment、selectedIndex
+
+ @param index the index of item
+ @param animated view scroll animated
+ */
+- (void)scrollToItemWithIndex:(NSInteger)index animated:(BOOL)animated;
+
+
+/**
+ 只滚动slideView和indecator到传入的index, 但segment和selectedIndex都不会变
+ 
+ @param index the index of slideView
+ @param animated view scroll animated
+ */
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end
