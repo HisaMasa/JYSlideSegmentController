@@ -98,8 +98,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 
 /**
- Scroll to item, will scroll the view / indicator ,and change the selected item
- Indicator always scrolled animated
+ 将所有页面和状态都滚动到传入的index，包括slideView、indicator、segment、selectedIndex
 
  @param index the index of item
  @param animated view scroll animated
@@ -108,9 +107,9 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 
 /**
- Scroll the view and indicator, but can't change the selected item
+ 只滚动slideView和indecator到传入的index, 但segment和selectedIndex都不会变
  
- @param index the index of view
+ @param index the index of slideView
  @param animated view scroll animated
  */
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated;
