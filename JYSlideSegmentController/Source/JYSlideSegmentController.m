@@ -222,10 +222,11 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (JYSlideView *)slideView
 {
   if (!_slideView) {
+    _slideView = [[JYSlideView alloc] initWithFrame:CGRectZero];
     CGRect frame = self.view.bounds;
     frame.size.height -= _segmentBar.frame.size.height;
     frame.origin.y = CGRectGetMaxY(_segmentBar.frame);
-    _slideView = [[JYSlideView alloc] initWithFrame:frame];
+    _slideView.frame = frame;
     _slideView.scrollEnabled = self.viewControllers.count > 1 ? YES : NO;
     _slideView.scrollContentSizeResizing = NO;
     _slideView.scrollsToTop = NO;
@@ -243,9 +244,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (UICollectionView *)segmentBar
 {
   if (!_segmentBar) {
+    _segmentBar = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:self.segmentBarLayout];
     CGRect frame = self.view.bounds;
     frame.size.height = self.segmentBarHeight;
-    _segmentBar = [[UICollectionView alloc] initWithFrame:frame collectionViewLayout:self.segmentBarLayout];
+    _segmentBar.frame = frame;
     _segmentBar.backgroundColor = [UIColor whiteColor];
     _segmentBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _segmentBar.delegate = self;
@@ -260,9 +262,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (UIView *)indicatorBgView
 {
   if (!_indicatorBgView) {
+    _indicatorBgView = [[UIView alloc] initWithFrame:CGRectZero];
     CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - self.indicatorHeight,
-                              self.itemWidth, self.indicatorHeight);
-    _indicatorBgView = [[UIView alloc] initWithFrame:frame];
+                            self.itemWidth, self.indicatorHeight);
+    _indicatorBgView.frame = frame;
     _indicatorBgView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     _indicatorBgView.backgroundColor = [UIColor clearColor];
     [_indicatorBgView addSubview:self.indicator];
@@ -273,9 +276,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 - (UIView *)indicator
 {
   if (!_indicator) {
+    _indicator = [[UIView alloc] initWithFrame:CGRectZero];
     CGFloat width = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
     CGRect frame = CGRectMake(self.indicatorInsets.left, 0, width, self.indicatorHeight);
-    _indicator = [[UIView alloc] initWithFrame:frame];
+    _indicator.frame = frame;
     _indicator.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     _indicator.backgroundColor = self.indicatorColor ? : [UIColor yellowColor];
   }
