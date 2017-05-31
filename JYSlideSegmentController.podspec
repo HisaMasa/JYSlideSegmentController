@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'JYSlideSegmentController'
-  s.version  = '1.3.4'
+  s.version  = '1.3.5'
   s.license  = 'MIT'
   s.summary  = 'JYSlideSegmentController is a view controllers container, just like the UITabBarController, with smooth gesture.'
   s.homepage = 'https://github.com/HisaMasa/JYSlideSegmentController'

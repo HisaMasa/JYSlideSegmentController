@@ -469,7 +469,9 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   if (indexPath.row < 0 || indexPath.row >= self.viewControllers.count) {
     return;
   }
-
+  if ([_delegate respondsToSelector:@selector(slideSegment:didSelectItemAtIndexPath:)]) {
+    [_delegate slideSegment:collectionView didSelectItemAtIndexPath:indexPath];
+  }
   [self setSelectedIndex:indexPath.row];
   [self scrollToViewWithIndex:self.selectedIndex animated:NO];
   [self segmentBarScrollToIndex:_selectedIndex animated:YES];
