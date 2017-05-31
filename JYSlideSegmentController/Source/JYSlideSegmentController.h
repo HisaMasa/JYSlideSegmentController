@@ -41,6 +41,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (BOOL)shouldSelectViewController:(UIViewController *)viewController;
 - (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
 - (void)slideViewDidScroll:(UIScrollView *)slideView;
+- (void)slideSegment:(UICollectionView *)segmentBar didSelectItemAtIndexPath:(NSIndexPath *)indexPath;
 @end
 
 @protocol JYSlideViewDelegate <NSObject>
