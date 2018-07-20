@@ -123,6 +123,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _selectedIndex = NSNotFound;
     _startIndex = 0;
     _firstShow = YES;
+    _indicatorType = JYIndicatorWidthTypeInset;
   }
   return self;
 }
@@ -138,6 +139,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     _previousIndex = NSNotFound;
     _startIndex = startIndex;
     _firstShow = YES;
+    _indicatorType = JYIndicatorWidthTypeInset;
   }
   return self;
 }
@@ -178,8 +180,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
                             self.segmentBar.frame.size.height - self.indicatorHeight,
                             itemFrame.size.width, self.indicatorHeight);
   self.indicatorBgView.frame = frame;
-  CGFloat indicatorWidth = itemFrame.size.width - self.indicatorInsets.left - self.indicatorInsets.right;
-  CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, self.indicatorHeight);
+  CGRect indicatorFrame = CGRectZero;
+  if (self.indicatorType == JYIndicatorWidthTypeFixed) {
+      CGFloat indicatorX = (itemFrame.size.width - self.indicatorWidth) / 2;
+      indicatorFrame = CGRectMake(indicatorX, 0, self.indicatorWidth, self.indicatorHeight);
+  } else if (self.indicatorType == JYIndicatorWidthTypeInset) {
+      CGFloat indicatorWidth = itemFrame.size.width - self.indicatorInsets.left - self.indicatorInsets.right;
+      indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, self.indicatorHeight);
+  }
   self.indicator.frame = indicatorFrame;
   CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
                                      CGRectGetWidth(self.segmentBar.frame), self.separatorHeight);
@@ -534,8 +542,13 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
                                                  CGRectGetWidth(srcItemFrame));
       }
     }
-    indicatorFrame.size.width = frame.size.width - self.indicatorInsets.left -
-                                self.indicatorInsets.right;
+    if (self.indicatorType == JYIndicatorWidthTypeFixed) {
+        indicatorFrame.origin.x = (frame.size.width - self.indicatorWidth) / 2;
+        indicatorFrame.size.width = self.indicatorWidth;
+    } else if (self.indicatorType == JYIndicatorWidthTypeInset) {
+        indicatorFrame.size.width = frame.size.width - self.indicatorInsets.left -
+        self.indicatorInsets.right;
+    }
     self.indicatorBgView.frame = frame;
     self.indicator.frame = indicatorFrame;
 
