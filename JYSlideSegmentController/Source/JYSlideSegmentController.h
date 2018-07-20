@@ -59,6 +59,11 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
 
+typedef enum {
+    JYIndicatorWidthTypeInset,
+    JYIndicatorWidthTypeFixed
+} JYIndicatorWidthType;
+
 @interface JYSlideSegmentController : UIViewController
 
 /**
@@ -80,6 +85,16 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @property (nonatomic, assign) CGFloat segmentBarHeight;
 @property (nonatomic, strong) UIColor *indicatorColor;
 @property (nonatomic, assign) CGFloat indicatorHeight;
+
+/**
+ indicator`s width will adjusted according to indicatorType.
+ when the indicatorType = JYIndicatorWidthTypeInset,
+ we will adjust indicator`s width by using indicatorInsets property.
+ when the indicatorType = JYIndicatorWidthTypeFixed,
+ we will adjust indicator`s width by using indicatorWidth property.
+ */
+@property (nonatomic, assign) JYIndicatorWidthType indicatorType;
+@property (nonatomic, assign) CGFloat indicatorWidth;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 @property (nonatomic, strong) UIColor *separatorColor;
 @property (nonatomic, strong) UIColor *segmentBarColor;
