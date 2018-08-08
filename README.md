@@ -19,3 +19,9 @@ pod "JYSlideSegmentController", "~> 1.1.0"
 ## License
 
 JYSlideSegmentController is available under the MIT license. See the LICENSE file for more info.
+
+## ChangeLog
+
+1.3.7
+
+- Fix crash & logic of handling orientation notification
