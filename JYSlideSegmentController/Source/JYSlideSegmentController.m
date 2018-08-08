@@ -425,7 +425,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (UIViewController *)selectedViewController
 {
-  return self.viewControllers[self.selectedIndex];
+  if (self.selectedIndex < self.viewControllers.count) {
+    return self.viewControllers[self.selectedIndex];
+  }
+  return nil;
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -686,10 +689,14 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 
 - (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
 {
-  NSParameterAssert(index >= 0 && index < self.viewControllers.count);
-  NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-  UICollectionViewLayoutAttributes *attributes = [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
-  return attributes.frame;
+  index = MAX(0, index);
+  NSParameterAssert(index < self.viewControllers.count);
+  if (index < self.viewControllers.count) {
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+    UICollectionViewLayoutAttributes *attributes = [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
+    return attributes.frame;
+  }
+  return CGRectZero;
 }
 
 - (void)adjustContentSize
@@ -699,3 +706,4 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
 }
 
 @end
+
