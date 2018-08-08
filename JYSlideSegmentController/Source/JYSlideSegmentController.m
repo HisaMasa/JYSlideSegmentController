@@ -149,12 +149,7 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [super viewDidLoad];
 
   [self setupSubviews];
-  
-  [[NSNotificationCenter defaultCenter]
-      addObserver:self
-         selector:@selector(handleOrientationDidChangeNotification:)
-             name:UIDeviceOrientationDidChangeNotification
-           object:nil];
+  [self configNotifications];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -224,6 +219,22 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   [_separator setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin];
   [_separator setBackgroundColor:self.separatorColor];
   [self.view addSubview:_separator];
+}
+
+- (void)configNotifications
+{
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleOrientationDidChangeNotification:)
+                                               name:UIDeviceOrientationDidChangeNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleWillResignActiveNotification:)
+                                               name:UIApplicationWillResignActiveNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleDidBecomeActiveNotification:)
+                                               name:UIApplicationDidBecomeActiveNotification
+                                             object:nil];
 }
 
 #pragma mark - Property
@@ -672,9 +683,10 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
   }
 }
 
+#pragma mark - Notifications
 - (void)handleOrientationDidChangeNotification:(NSNotification *)notification
 {
-    if (self.selectedIndex == NSNotFound) {
+    if (self.selectedIndex == NSNotFound || !self.view.window) {
         return;
     }
     self.slideView.scrollContentSizeResizing = YES;
@@ -685,6 +697,19 @@ NSString * const segmentBarItemID = @"JYSegmentBarItem";
     [self.segmentBar layoutIfNeeded];
     [self configureViewControllerFrame:self.selectedViewController];
     [self scrollToViewWithIndex:self.selectedIndex animated:NO];
+}
+
+- (void)handleWillResignActiveNotification:(NSNotification *)notification
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+}
+
+- (void)handleDidBecomeActiveNotification:(NSNotification *)notification
+{
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleOrientationDidChangeNotification:)
+                                               name:UIDeviceOrientationDidChangeNotification
+                                             object:nil];
 }
 
 - (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
