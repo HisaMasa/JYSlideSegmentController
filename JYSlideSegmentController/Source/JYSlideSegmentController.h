@@ -53,7 +53,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
         (UIGestureRecognizer *)otherGestureRecognizer;
 @end
 
-@interface JYSlideView : UIScrollView <UIGestureRecognizerDelegate>
+@interface JYSlideView : UICollectionView <UIGestureRecognizerDelegate>
 
 @property (nonatomic, weak) id<JYSlideViewDelegate> slideDelegate;
 
