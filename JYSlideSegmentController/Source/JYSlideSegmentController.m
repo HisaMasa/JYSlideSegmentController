@@ -8,13 +8,6 @@
 
 #import "JYSlideSegmentController.h"
 
-#define INDICATOR_HEIGHT (3)
-
-#define UIColorFromRGB(rgbValue) \
-[UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \
-green:((float)((rgbValue & 0xFF00) >> 8))/255.0 \
-blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
-
 NSString * const JYSegmentBarItemID = @"JYSegmentBarItem";
 NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 
@@ -32,6 +25,20 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   self = [super initWithFrame:frame];
   if (self) {
     [self.contentView addSubview:self.titleLabel];
+    [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.titleLabel
+                                                                 attribute:NSLayoutAttributeCenterX
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:self.contentView
+                                                                 attribute:NSLayoutAttributeCenterX
+                                                                multiplier:1
+                                                                  constant:0]];
+    [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.titleLabel
+                                                                 attribute:NSLayoutAttributeCenterY
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:self.contentView
+                                                                 attribute:NSLayoutAttributeCenterY
+                                                                multiplier:1
+                                                                  constant:0]];
   }
   return self;
 }
@@ -39,19 +46,12 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 - (UILabel *)titleLabel
 {
   if (!_titleLabel) {
-    _titleLabel = [[UILabel alloc] initWithFrame:self.contentView.bounds];
-    _titleLabel.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _titleLabel.textAlignment = NSTextAlignmentCenter;
+    _titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
   }
   return _titleLabel;
 }
-
-@end
-
-@interface JYSlideView()
-
-//don't trigger scrollViewDidScroll when scrollContentSizeResizing = YES
-@property (nonatomic, assign) BOOL scrollContentSizeResizing;
 
 @end
 
@@ -94,39 +94,26 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 
 @property (nonatomic, strong, readwrite) UICollectionView *segmentBar;
 @property (nonatomic, strong, readwrite) JYSlideView *slideView;
-@property (nonatomic, assign, readwrite) NSInteger selectedIndex;
-@property (nonatomic, assign, readwrite) CGFloat lastDestination;
+
 @property (nonatomic, strong) UIView *indicator;
-@property (nonatomic, strong) UIView *indicatorBgView;
 @property (nonatomic, strong) UIView *separator;
-@property (nonatomic, assign) CGRect currentIndicatorFrame;
 
 @property (nonatomic, strong) UICollectionViewFlowLayout *segmentBarLayout;
 @property (nonatomic, strong) UICollectionViewFlowLayout *slideViewLayout;
 
-@property (nonatomic, assign, getter=isFirstShow) BOOL firstShow;
-
+@property (nonatomic, assign) CGPoint lastContentOffset;
+@property (nonatomic, assign) NSInteger previousIndex;
 
 - (void)reset;
 
 @end
 
 @implementation JYSlideSegmentController
-@synthesize viewControllers = _viewControllers;
-@synthesize itemWidth = _itemWidth;
 @synthesize separatorColor = _separatorColor;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
 {
-  self = [super initWithNibName:nil bundle:nil];
-  if (self) {
-    _viewControllers = [viewControllers copy];
-    _selectedIndex = NSNotFound;
-    _startIndex = 0;
-    _firstShow = YES;
-    _indicatorType = JYIndicatorWidthTypeInset;
-  }
-  return self;
+  return [self initWithViewControllers:viewControllers startIndex:0];
 }
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
@@ -136,10 +123,10 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _viewControllers = [viewControllers copy];
-    _selectedIndex = NSNotFound;
     _startIndex = startIndex;
-    _firstShow = YES;
     _indicatorType = JYIndicatorWidthTypeInset;
+    _lastContentOffset = CGPointZero;
+    _previousIndex = NSNotFound;
   }
   return self;
 }
@@ -148,45 +135,14 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 {
   [super viewDidLoad];
   [self configSubviews];
-  [self configNotifications];
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-  [super viewWillAppear:animated];
-  if (self.isFirstShow) {
-    [self setSelectedIndex:self.startIndex];
-    self.firstShow = NO;
-  }
-}
-
-- (void)viewDidLayoutSubviews
-{
-  [super viewDidLayoutSubviews];
-  
-  CGRect itemFrame = [self frameForSegmentItemAtIndex:self.selectedIndex];
-  CGRect frame = CGRectMake(itemFrame.origin.x,
-                            self.segmentBar.frame.size.height - self.indicatorHeight,
-                            itemFrame.size.width, self.indicatorHeight);
-  self.indicatorBgView.frame = frame;
-  CGRect indicatorFrame = CGRectZero;
-  if (self.indicatorType == JYIndicatorWidthTypeFixed) {
-      CGFloat indicatorX = (itemFrame.size.width - self.indicatorWidth) / 2;
-      indicatorFrame = CGRectMake(indicatorX, 0, self.indicatorWidth, self.indicatorHeight);
-  } else if (self.indicatorType == JYIndicatorWidthTypeInset) {
-      CGFloat indicatorWidth = itemFrame.size.width - self.indicatorInsets.left - self.indicatorInsets.right;
-      indicatorFrame = CGRectMake(self.indicatorInsets.left, 0, indicatorWidth, self.indicatorHeight);
-  }
-  self.indicator.frame = indicatorFrame;
-  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
-                                     CGRectGetWidth(self.segmentBar.frame), self.separatorHeight);
-  self.separator.frame = separatorFrame;
-
+  [self configObservers];
+  [self setSelectedIndex:self.startIndex];
 }
 
 - (void)dealloc
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [self removeObserver:self forKeyPath:@"slideView.contentOffset"];
+  [self removeObserver:self forKeyPath:@"segmentBar.contentOffset"];
 }
 
 #pragma mark - Setup
@@ -194,6 +150,8 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 {
   [self.view addSubview:self.segmentBar];
   [self.view addSubview:self.slideView];
+  [self.view addSubview:self.separator];
+  [self.view addSubview:self.indicator];
   [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.segmentBar
                                                         attribute:NSLayoutAttributeLeft
                                                         relatedBy:NSLayoutRelationEqual
@@ -221,7 +179,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
                                                                  toItem:nil
                                                               attribute:NSLayoutAttributeNotAnAttribute
                                                              multiplier:1
-                                                               constant:self.segmentBarHeight]];
+                                                               constant:self.segmentHeight]];
   
   [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.slideView
                                                         attribute:NSLayoutAttributeLeft
@@ -252,35 +210,98 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
                                                        multiplier:1
                                                          constant:0]];
   
-  [self.segmentBar registerClass:[JYSegmentBarItem class] forCellWithReuseIdentifier:JYSegmentBarItemID];
-  [self.segmentBar addSubview:self.indicatorBgView];
+  [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
+                                                        attribute:NSLayoutAttributeLeft
+                                                        relatedBy:NSLayoutRelationEqual
+                                                           toItem:self.segmentBar
+                                                        attribute:NSLayoutAttributeLeft
+                                                       multiplier:1
+                                                         constant:0]];
+  [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
+                                                        attribute:NSLayoutAttributeRight
+                                                        relatedBy:NSLayoutRelationEqual
+                                                           toItem:self.segmentBar
+                                                        attribute:NSLayoutAttributeRight
+                                                       multiplier:1
+                                                         constant:0]];
+  [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
+                                                        attribute:NSLayoutAttributeBottom
+                                                        relatedBy:NSLayoutRelationEqual
+                                                           toItem:self.segmentBar
+                                                        attribute:NSLayoutAttributeBottom
+                                                       multiplier:1
+                                                         constant:0]];
+  [self.separator addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
+                                                             attribute:NSLayoutAttributeHeight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:nil
+                                                             attribute:NSLayoutAttributeNotAnAttribute
+                                                            multiplier:1
+                                                              constant:self.separatorHeight]];
   
+  [self.segmentBar registerClass:[JYSegmentBarItem class] forCellWithReuseIdentifier:JYSegmentBarItemID];
   [self.slideView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:JYSlideViewItemID];
-
-  CGRect separatorFrame = CGRectMake(0, CGRectGetMaxY(self.segmentBar.frame),
-                                     CGRectGetWidth(self.segmentBar.frame), 1);
-  _separator = [[UIView alloc] initWithFrame:separatorFrame];
-  [_separator setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin];
-  [_separator setBackgroundColor:self.separatorColor];
-  [self.view addSubview:_separator];
+  [self.separator setBackgroundColor:self.separatorColor];
+  
   self.automaticallyAdjustsScrollViewInsets = NO;
   self.edgesForExtendedLayout = UIRectEdgeNone;
+  [self.slideView layoutIfNeeded];
+  [self.segmentBar layoutIfNeeded];
 }
 
-- (void)configNotifications
+- (void)configObservers
 {
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleOrientationDidChangeNotification:)
-                                               name:UIDeviceOrientationDidChangeNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleWillResignActiveNotification:)
-                                               name:UIApplicationWillResignActiveNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleDidBecomeActiveNotification:)
-                                               name:UIApplicationDidBecomeActiveNotification
-                                             object:nil];
+  [self addObserver:self forKeyPath:@"slideView.contentOffset" options:NSKeyValueObservingOptionNew context:nil];
+  [self addObserver:self forKeyPath:@"segmentBar.contentOffset" options:NSKeyValueObservingOptionNew context:nil];
+}
+
+#pragma mark - KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context
+{
+  CGPoint contentOffset = self.slideView.contentOffset;
+  CGFloat direction = self.lastContentOffset.x - contentOffset.x > 0 ? -1.0 : 1.0;
+  CGFloat slideViewWidth = self.slideView.frame.size.width;
+  NSInteger selectedIndex = self.selectedIndex;
+  CGFloat progress = direction * (contentOffset.x - selectedIndex * slideViewWidth) / slideViewWidth;
+  CGFloat x = selectedIndex * self.segmentWidth - self.segmentBar.contentOffset.x;
+  CGFloat y = CGRectGetMaxY(self.segmentBar.frame) - self.indicatorHeight;
+  CGFloat w = self.indicatorType == JYIndicatorWidthTypeFixed
+                ? self.indicatorWidth
+                : self.segmentWidth - self.indicatorInsets.left - self.indicatorInsets.right;
+  if (0 < progress && progress < 0.5) {
+    // stretch to right
+    x += progress * self.segmentWidth;
+    w += progress * self.segmentWidth;
+  } else if(progress >= 0.5 && progress < 1) {
+    // shrink to right
+    CGFloat percentage = contentOffset.x / MAX(self.slideView.contentSize.width, self.view.bounds.size.width);
+    x = percentage * self.segmentBar.contentSize.width - self.segmentBar.contentOffset.x;
+    w += (1 - progress) * self.segmentWidth;
+  } else if (-0.5 < progress && progress < 0) {
+    // shrink to left
+    x -= progress * self.segmentWidth;
+    w -= progress * self.segmentWidth;
+  } else if (-1.0 < progress && progress <= -0.5) {
+    // stretch to left
+    CGFloat percentage = contentOffset.x / MAX(self.slideView.contentSize.width, self.view.bounds.size.width);
+    x = percentage * self.segmentBar.contentSize.width - self.segmentBar.contentOffset.x;
+    w += (1 + progress) * self.segmentWidth;
+  }
+  
+  // add padding
+  x += (self.segmentWidth - w) / 2;
+  
+  CGRect indicatorFrame = CGRectMake(x, y, w, self.indicatorHeight);
+  self.indicator.frame = indicatorFrame;
+  
+  if ([keyPath isEqualToString:@"slideView.contentOffset"]) {
+    // recoard last content offset to adjust direction
+    self.lastContentOffset = contentOffset;
+  }
 }
 
 #pragma mark - Property
@@ -290,8 +311,6 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
     _slideView = [[JYSlideView alloc] initWithFrame:CGRectZero collectionViewLayout:self.slideViewLayout];
     _slideView.scrollEnabled = _viewControllers.count > 1 ? YES : NO;
     _slideView.scrollsToTop = NO;
-    [_slideView setAutoresizingMask:(UIViewAutoresizingFlexibleWidth
-                                     | UIViewAutoresizingFlexibleHeight)];
     [_slideView setShowsHorizontalScrollIndicator:NO];
     [_slideView setShowsVerticalScrollIndicator:NO];
     [_slideView setPagingEnabled:YES];
@@ -299,6 +318,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
     [_slideView setDelegate:self];
     [_slideView setDataSource:self];
     [_slideView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    _slideView.backgroundColor = [UIColor whiteColor];
   }
   return _slideView;
 }
@@ -308,90 +328,65 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   if (!_segmentBar) {
     _segmentBar = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:self.segmentBarLayout];
     _segmentBar.backgroundColor = [UIColor whiteColor];
-    _segmentBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _segmentBar.delegate = self;
     _segmentBar.dataSource = self;
     _segmentBar.showsHorizontalScrollIndicator = NO;
     _segmentBar.showsVerticalScrollIndicator = NO;
     _segmentBar.scrollsToTop = NO;
-    [_segmentBar setTranslatesAutoresizingMaskIntoConstraints:NO];
+    _segmentBar.translatesAutoresizingMaskIntoConstraints = NO;
   }
   return _segmentBar;
-}
-
-- (UIView *)indicatorBgView
-{
-  if (!_indicatorBgView) {
-    _indicatorBgView = [[UIView alloc] initWithFrame:CGRectZero];
-    CGRect frame = CGRectMake(0, self.segmentBar.frame.size.height - self.indicatorHeight,
-                            self.itemWidth, self.indicatorHeight);
-    _indicatorBgView.frame = frame;
-    _indicatorBgView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-    _indicatorBgView.backgroundColor = [UIColor clearColor];
-    [_indicatorBgView addSubview:self.indicator];
-  }
-  return _indicatorBgView;
 }
 
 - (UIView *)indicator
 {
   if (!_indicator) {
     _indicator = [[UIView alloc] initWithFrame:CGRectZero];
-    CGFloat width = self.itemWidth - self.indicatorInsets.left - self.indicatorInsets.right;
-    CGRect frame = CGRectMake(self.indicatorInsets.left, 0, width, self.indicatorHeight);
-    _indicator.frame = frame;
     _indicator.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
     _indicator.backgroundColor = self.indicatorColor ? : [UIColor yellowColor];
   }
   return _indicator;
 }
 
+- (UIView *)separator
+{
+  if (!_separator) {
+    _separator = [[UIView alloc] initWithFrame:CGRectZero];
+    [_separator setTranslatesAutoresizingMaskIntoConstraints:NO];
+  }
+  return _separator;
+}
+
 - (CGFloat)indicatorHeight
 {
   if (!_indicatorHeight) {
-    _indicatorHeight = INDICATOR_HEIGHT;
+    _indicatorHeight = 3;
   }
   return _indicatorHeight;
 }
 
-- (CGFloat)segmentBarHeight
+- (CGFloat)segmentHeight
 {
-  if (!_segmentBarHeight) {
-    _segmentBarHeight = 40;
+  if (!_segmentHeight) {
+    _segmentHeight = 40;
   }
-  return _segmentBarHeight;
+  return _segmentHeight;
 }
 
 - (CGFloat)separatorHeight
 {
     if (!_separatorHeight) {
-        _separatorHeight = 1.f;
+        _separatorHeight = 1.0 / [UIScreen mainScreen].scale;
     }
     return _separatorHeight;
 }
 
-- (CGFloat)itemWidth
+- (CGFloat)segmentWidth
 {
-  if (!_itemWidth) {
-    _itemWidth = self.view.frame.size.width / self.viewControllers.count;
+  if (!_segmentWidth) {
+    _segmentWidth = self.view.frame.size.width / self.viewControllers.count;
   }
-  return _itemWidth;
-}
-
-- (void)setItemWidth:(CGFloat)itemWidth
-{
-  _itemWidth = itemWidth;
-  if (_segmentBarLayout && _segmentBar) {
-    _segmentBarLayout.itemSize = CGSizeMake(_itemWidth, self.segmentBarHeight);
-    [_segmentBar setCollectionViewLayout:_segmentBarLayout animated:NO];
-    [self.view setNeedsLayout];
-  }
-}
-
-- (void)setSegmentBarColor:(UIColor *)segmentBarColor
-{
-  _segmentBarColor = segmentBarColor;
-  _segmentBar.backgroundColor = _segmentBarColor;
+  return _segmentWidth;
 }
 
 - (void)setIndicatorColor:(UIColor *)indicatorColor
@@ -403,7 +398,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 - (UIColor *)separatorColor
 {
   if (!_separatorColor) {
-    _separatorColor = UIColorFromRGB(0xdcdcdc);
+    _separatorColor = [UIColor lightGrayColor];
   }
   return _separatorColor;
 }
@@ -411,14 +406,14 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 - (void)setSeparatorColor:(UIColor *)separatorColor
 {
   _separatorColor = separatorColor;
-  self.separator.backgroundColor = _separatorColor;
+  _separator.backgroundColor = _separatorColor;
 }
 
 - (UICollectionViewFlowLayout *)segmentBarLayout
 {
   if (!_segmentBarLayout) {
     _segmentBarLayout = [[UICollectionViewFlowLayout alloc] init];
-    _segmentBarLayout.sectionInset = self.segmentBarInsets;
+    _segmentBarLayout.sectionInset = UIEdgeInsetsZero;
     _segmentBarLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _segmentBarLayout.minimumLineSpacing = 0;
     _segmentBarLayout.minimumInteritemSpacing = 0;
@@ -443,9 +438,9 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   [self scrollToViewWithIndex:selectedIndex animated:NO];
 }
 
-- (void)setStartIndex:(NSInteger)startIndex
+- (NSInteger)selectedIndex
 {
-  _startIndex = startIndex;
+  return floor(self.slideView.contentOffset.x / MAX(self.slideView.bounds.size.width, self.view.bounds.size.width));
 }
 
 - (void)setViewControllers:(NSArray *)viewControllers
@@ -459,11 +454,6 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   }
   _viewControllers = [viewControllers copy];
   [self reset];
-}
-
-- (NSArray *)viewControllers
-{
-  return [_viewControllers copy];
 }
 
 - (UIViewController *)selectedViewController
@@ -519,13 +509,10 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
     if ([_dataSource respondsToSelector:@selector(slideSegment:layout:sizeForItemAtIndexPath:)]) {
       return [_dataSource slideSegment:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
     }
-    CGSize cellSize;
-    cellSize.height = self.segmentBarHeight;
-    cellSize.width = self.itemWidth;
-    return cellSize;
+    return CGSizeMake(self.segmentWidth, self.segmentHeight);
   }
   // sub vc frame
-  return self.slideView.frame.size;
+  return self.slideView.bounds.size;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -539,7 +526,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   if ([_delegate respondsToSelector:@selector(slideSegment:didSelectItemAtIndexPath:)]) {
     [_delegate slideSegment:collectionView didSelectItemAtIndexPath:indexPath];
   }
-  [self setSelectedIndex:indexPath.row];
+  [self scrollToViewWithIndex:indexPath.row animated:YES];
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -566,15 +553,43 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   if (collectionView == self.segmentBar) {
     return;
   }
-  UICollectionViewCell *slideViewItemCell = [collectionView dequeueReusableCellWithReuseIdentifier:JYSlideViewItemID
-                                                                                      forIndexPath:indexPath];
+  
   UIViewController *toSelectController = self.viewControllers[indexPath.row];
   if (!toSelectController.parentViewController) {
     [self addChildViewController:toSelectController];
-    [slideViewItemCell.contentView addSubview:toSelectController.view];
+    [cell.contentView addSubview:toSelectController.view];
+    [toSelectController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:toSelectController.view
+                                                                 attribute:NSLayoutAttributeLeft
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:cell.contentView
+                                                                 attribute:NSLayoutAttributeLeft
+                                                                multiplier:1
+                                                                  constant:0]];
+    [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:toSelectController.view
+                                                                 attribute:NSLayoutAttributeRight
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:cell.contentView
+                                                                 attribute:NSLayoutAttributeRight
+                                                                multiplier:1
+                                                                  constant:0]];
+    [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:toSelectController.view
+                                                                 attribute:NSLayoutAttributeTop
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:cell.contentView
+                                                                 attribute:NSLayoutAttributeTop
+                                                                multiplier:1
+                                                                  constant:0]];
+    [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:toSelectController.view
+                                                                 attribute:NSLayoutAttributeBottom
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:cell.contentView
+                                                                 attribute:NSLayoutAttributeBottom
+                                                                multiplier:1
+                                                                  constant:0]];
     [toSelectController didMoveToParentViewController:self];
   }
-  self.slideView.backgroundColor = toSelectController.view.backgroundColor;
+  
   if ([_delegate respondsToSelector:@selector(didSelectViewController:)]) {
     [_delegate didSelectViewController:self.selectedViewController];
   }
@@ -598,63 +613,19 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   }
 }
 
+- (CGPoint)collectionView:(UICollectionView *)collectionView
+targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
+{
+  if (collectionView == self.slideView) {
+    return self.previousIndex == NSNotFound ? proposedContentOffset : CGPointMake(self.previousIndex * self.slideView.bounds.size.width, 0);
+  }
+  return proposedContentOffset;
+}
+
 #pragma mark - UIScrollViewDelegate
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
   if (scrollView == self.slideView) {
-    if (self.slideView.scrollContentSizeResizing) {
-      return;
-    }
-    CGFloat percent = scrollView.contentOffset.x / scrollView.contentSize.width;
-    CGFloat destination = percent * self.viewControllers.count;
-    NSInteger index = destination >= self.lastDestination ? ceilf(destination)
-                                                          : floor(destination);
-    CGRect frame = self.currentIndicatorFrame;
-
-    CGRect indicatorFrame = CGRectMake(self.indicatorInsets.left, 0,
-                                       self.itemWidth, self.indicatorHeight);
-    CGFloat segmentBarPercent =
-        fmodf(scrollView.contentOffset.x, CGRectGetWidth(self.view.frame)) /
-        CGRectGetWidth(self.view.frame);
-
-    CGPoint translation = [scrollView.panGestureRecognizer translationInView:scrollView.superview];
-
-    if (segmentBarPercent == 0.f) {
-      NSInteger currentIndex = scrollView.contentOffset.x / CGRectGetWidth(self.view.frame);
-      CGRect cellFrame = [self frameForSegmentItemAtIndex:currentIndex];
-      frame.origin.x = cellFrame.origin.x;
-      frame.size.width = CGRectGetWidth(cellFrame);
-      self.itemWidth = CGRectGetWidth(cellFrame);
-    } else {
-      if (translation.x > 0) {
-        CGRect destItemFrame = [self frameForSegmentItemAtIndex:(ceilf(destination) - 1)];
-        CGRect srcItemFrame = [self frameForSegmentItemAtIndex:ceilf(destination)];
-        frame.origin.x -= (1 - segmentBarPercent) * CGRectGetWidth(destItemFrame);
-        frame.size.width +=
-            (1 - segmentBarPercent) *
-            (CGRectGetWidth(destItemFrame) - CGRectGetWidth(srcItemFrame));
-      } else {
-        CGRect destItemFrame = [self frameForSegmentItemAtIndex:(floor(destination) + 1)];
-        CGRect srcItemFrame = [self frameForSegmentItemAtIndex:floor(destination)];
-        frame.origin.x += segmentBarPercent * srcItemFrame.size.width;
-        frame.size.width += segmentBarPercent * (CGRectGetWidth(destItemFrame) -
-                                                 CGRectGetWidth(srcItemFrame));
-      }
-    }
-    if (self.indicatorType == JYIndicatorWidthTypeFixed) {
-        indicatorFrame.origin.x = (frame.size.width - self.indicatorWidth) / 2;
-        indicatorFrame.size.width = self.indicatorWidth;
-    } else if (self.indicatorType == JYIndicatorWidthTypeInset) {
-        indicatorFrame.size.width = frame.size.width - self.indicatorInsets.left -
-        self.indicatorInsets.right;
-    }
-    self.indicatorBgView.frame = frame;
-    self.indicator.frame = indicatorFrame;
-
-    if (index >= 0 && index < self.viewControllers.count) {
-      [self setSelectedIndex:index];
-    }
-    self.lastDestination = destination;
-
     if ([_delegate respondsToSelector:@selector(slideViewDidScroll:)]) {
       [_delegate slideViewDidScroll:scrollView];
     }
@@ -665,15 +636,10 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   }
 }
 
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
-  self.currentIndicatorFrame = self.indicatorBgView.frame;
-}
-
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
   if (scrollView == self.slideView) {
-    [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+    [self segmentBarScrollToIndex:self.selectedIndex animated:YES];
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -683,7 +649,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
   if (scrollView == self.slideView) {
-    [self segmentBarScrollToIndex:_selectedIndex animated:YES];
+    [self segmentBarScrollToIndex:self.selectedIndex animated:YES];
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
       [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -693,11 +659,10 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 #pragma mark - Action
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated
 {
-  if (_selectedIndex == index) {
+  if (self.selectedIndex == index) {
     return;
   }
   NSParameterAssert(index >= 0 && index < self.viewControllers.count);
-  _selectedIndex = index;
   [self.slideView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]
                          atScrollPosition:UICollectionViewScrollPositionLeft
                                  animated:NO];
@@ -710,10 +675,11 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 
 - (void)reset
 {
-  _selectedIndex = NSNotFound;
-
+  self.lastContentOffset = CGPointZero;
+  self.previousIndex = NSNotFound;
   [self.segmentBar reloadData];
-
+  [self.slideView reloadData];
+  // reset to start index, if want to change index to 0, you should set startIndex before set viewControllers
   [self setSelectedIndex:self.startIndex];
 }
 
@@ -725,41 +691,16 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
              scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
 }
 
-#pragma mark - Notifications
-- (void)handleOrientationDidChangeNotification:(NSNotification *)notification
+#pragma mark - UIContentContainer
+- (void)viewWillTransitionToSize:(CGSize)size
+       withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
-    if (self.selectedIndex == NSNotFound || !self.view.window) {
-        return;
-    }
-    [self.segmentBar reloadData];
-    [self.segmentBar setNeedsLayout];
-    [self.segmentBar layoutIfNeeded];
-    [self scrollToViewWithIndex:self.selectedIndex animated:NO];
-}
-
-- (void)handleWillResignActiveNotification:(NSNotification *)notification
-{
-  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-}
-
-- (void)handleDidBecomeActiveNotification:(NSNotification *)notification
-{
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleOrientationDidChangeNotification:)
-                                               name:UIDeviceOrientationDidChangeNotification
-                                             object:nil];
-}
-
-- (CGRect)frameForSegmentItemAtIndex:(NSInteger)index
-{
-  index = MAX(0, index);
-  NSParameterAssert(index < self.viewControllers.count);
-  if (index < self.viewControllers.count) {
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-    UICollectionViewLayoutAttributes *attributes = [self.segmentBar layoutAttributesForItemAtIndexPath:indexPath];
-    return attributes.frame;
-  }
-  return CGRectZero;
+  [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+  // record index to support targetContentOffsetForProposedContentOffset
+  // https://stackoverflow.com/questions/41639968/uicollectionview-contentoffset-after-device-rotation
+  self.previousIndex = self.selectedIndex;
+  [self.slideView.collectionViewLayout invalidateLayout];
+  [self.segmentBar.collectionViewLayout invalidateLayout];
 }
 
 @end

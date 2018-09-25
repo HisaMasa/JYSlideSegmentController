@@ -81,24 +81,25 @@ typedef enum {
 /**
  *  Custom UI
  */
-@property (nonatomic, assign) CGFloat itemWidth;
-@property (nonatomic, assign) CGFloat segmentBarHeight;
-@property (nonatomic, strong) UIColor *indicatorColor;
-@property (nonatomic, assign) CGFloat indicatorHeight;
+@property (nonatomic, assign) CGFloat segmentWidth;
+@property (nonatomic, assign) CGFloat segmentHeight;
 
 /**
  indicator`s width will adjusted according to indicatorType.
  when the indicatorType = JYIndicatorWidthTypeInset,
- we will adjust indicator`s width by using indicatorInsets property.
+ it will adjust indicator`s width by using indicatorInsets property.
  when the indicatorType = JYIndicatorWidthTypeFixed,
- we will adjust indicator`s width by using indicatorWidth property.
+ it will adjust indicator`s width by using indicatorWidth property.
  */
 @property (nonatomic, assign) JYIndicatorWidthType indicatorType;
-@property (nonatomic, assign) CGFloat indicatorWidth;
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
+
+@property (nonatomic, assign) CGFloat indicatorWidth;
+@property (nonatomic, assign) CGFloat indicatorHeight;
+
+@property (nonatomic, strong) UIColor *indicatorColor;
+
 @property (nonatomic, strong) UIColor *separatorColor;
-@property (nonatomic, strong) UIColor *segmentBarColor;
-@property (nonatomic, assign) UIEdgeInsets segmentBarInsets;
 @property (nonatomic, assign) CGFloat separatorHeight;
 
 /**

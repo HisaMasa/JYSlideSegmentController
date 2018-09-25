@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		71431B66215B89C200454F2A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 71431B64215B89C200454F2A /* ViewController.m */; };
+		71431B67215B89C200454F2A /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 71431B65215B89C200454F2A /* ViewController.xib */; };
 		B76AFD671C36E89100935120 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B76AFD661C36E89100935120 /* LaunchScreen.storyboard */; };
 		E12DF8DF18E94BFC006B8543 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8DE18E94BFC006B8543 /* Foundation.framework */; };
 		E12DF8E118E94BFC006B8543 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8E018E94BFC006B8543 /* CoreGraphics.framework */; };
@@ -32,6 +34,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		71431B63215B89C200454F2A /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		71431B64215B89C200454F2A /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		71431B65215B89C200454F2A /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		B76AFD661C36E89100935120 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E12DF8DB18E94BFC006B8543 /* JYSlideSegmentController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JYSlideSegmentController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12DF8DE18E94BFC006B8543 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -139,6 +144,9 @@
 			children = (
 				E15A7BF018EA9FD700BD23E5 /* AppDelegate.h */,
 				E15A7BF118EA9FD700BD23E5 /* AppDelegate.m */,
+				71431B63215B89C200454F2A /* ViewController.h */,
+				71431B64215B89C200454F2A /* ViewController.m */,
+				71431B65215B89C200454F2A /* ViewController.xib */,
 				B76AFD661C36E89100935120 /* LaunchScreen.storyboard */,
 			);
 			path = App;
@@ -222,6 +230,7 @@
 			files = (
 				B76AFD671C36E89100935120 /* LaunchScreen.storyboard in Resources */,
 				E12DF8FA18E94BFC006B8543 /* Images.xcassets in Resources */,
+				71431B67215B89C200454F2A /* ViewController.xib in Resources */,
 				E12DF8E918E94BFC006B8543 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -242,6 +251,7 @@
 			files = (
 				E15A7BEE18EA9FBD00BD23E5 /* JYSlideSegmentController.m in Sources */,
 				E12DF8EB18E94BFC006B8543 /* main.m in Sources */,
+				71431B66215B89C200454F2A /* ViewController.m in Sources */,
 				E15A7BF218EA9FD700BD23E5 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
