@@ -20,11 +20,9 @@
   self.slideSegmentController = [[JYSlideSegmentController alloc] initWithViewControllers:[self vcs]
                                                                                startIndex:0];
   self.slideSegmentController.title = @"JYSlideSegmentController";
-  self.slideSegmentController.indicatorInsets = UIEdgeInsetsMake(0, 8, 0, 8);
-  self.slideSegmentController.indicatorColor = [UIColor greenColor];
+  self.slideSegmentController.indicatorInsets = UIEdgeInsetsMake(0, 0, 2, 0);
   self.slideSegmentController.segmentWidth = 80;
   self.slideSegmentController.indicatorWidth = 22;
-  self.slideSegmentController.indicatorType = JYIndicatorWidthTypeFixed;
   UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:self.slideSegmentController];
   self.window.rootViewController = navi;
 

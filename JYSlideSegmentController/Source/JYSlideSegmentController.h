@@ -49,8 +49,8 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @optional
 - (BOOL)slideViewPanGestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
 - (BOOL)slideViewPanGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
-    shouldRecognizeSimultaneouslyWithGestureRecognizer:
-        (UIGestureRecognizer *)otherGestureRecognizer;
+shouldRecognizeSimultaneouslyWithGestureRecognizer:
+(UIGestureRecognizer *)otherGestureRecognizer;
 @end
 
 @interface JYSlideView : UICollectionView <UIGestureRecognizerDelegate>
@@ -58,11 +58,6 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @property (nonatomic, weak) id<JYSlideViewDelegate> slideDelegate;
 
 @end
-
-typedef enum {
-    JYIndicatorWidthTypeInset,
-    JYIndicatorWidthTypeFixed
-} JYIndicatorWidthType;
 
 @interface JYSlideSegmentController : UIViewController
 
@@ -85,20 +80,12 @@ typedef enum {
 @property (nonatomic, assign) CGFloat segmentHeight;
 @property (nonatomic, assign) UIEdgeInsets segmentInsets; // segmentBar layout sectionInset
 
-/**
- indicator`s width will adjusted according to indicatorType.
- when the indicatorType = JYIndicatorWidthTypeInset,
- it will adjust indicator`s width by using indicatorInsets property.
- when the indicatorType = JYIndicatorWidthTypeFixed,
- it will adjust indicator`s width by using indicatorWidth property.
- */
-@property (nonatomic, assign) JYIndicatorWidthType indicatorType;
+@property (nonatomic, strong) UIView *indicator;
+
 @property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 
 @property (nonatomic, assign) CGFloat indicatorWidth;
 @property (nonatomic, assign) CGFloat indicatorHeight;
-
-@property (nonatomic, strong) UIColor *indicatorColor;
 
 @property (nonatomic, strong) UIColor *separatorColor;
 @property (nonatomic, assign) CGFloat separatorHeight;
