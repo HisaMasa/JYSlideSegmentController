@@ -83,6 +83,7 @@ typedef enum {
  */
 @property (nonatomic, assign) CGFloat segmentWidth;
 @property (nonatomic, assign) CGFloat segmentHeight;
+@property (nonatomic, assign) UIEdgeInsets segmentInsets; // segmentBar layout sectionInset
 
 /**
  indicator`s width will adjusted according to indicatorType.

@@ -268,7 +268,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
   NSInteger selectedIndex = self.selectedIndex;
   CGFloat progress = direction * (contentOffset.x - selectedIndex * slideViewWidth) / slideViewWidth;
   CGFloat x = selectedIndex * self.segmentWidth - self.segmentBar.contentOffset.x;
-  CGFloat y = CGRectGetMaxY(self.segmentBar.frame) - self.indicatorHeight;
+  CGFloat y = CGRectGetMaxY(self.segmentBar.frame) - self.indicatorHeight - self.indicatorInsets.bottom;
   CGFloat w = self.indicatorType == JYIndicatorWidthTypeFixed
                 ? self.indicatorWidth
                 : self.segmentWidth - self.indicatorInsets.left - self.indicatorInsets.right;
@@ -413,7 +413,7 @@ NSString * const JYSlideViewItemID = @"JYSlideViewItemID";
 {
   if (!_segmentBarLayout) {
     _segmentBarLayout = [[UICollectionViewFlowLayout alloc] init];
-    _segmentBarLayout.sectionInset = UIEdgeInsetsZero;
+    _segmentBarLayout.sectionInset = _segmentInsets;
     _segmentBarLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
     _segmentBarLayout.minimumLineSpacing = 0;
     _segmentBarLayout.minimumInteritemSpacing = 0;
