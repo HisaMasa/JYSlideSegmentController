@@ -484,10 +484,17 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 - (UIViewController *)selectedViewController
 {
     if (self.selectedIndex < self.viewControllers.count) {
-        return self.viewControllers[self.selectedIndex];
+        return [self viewControllerAtIndex:self.selectedIndex];
     }
     return nil;
 }
+
+- (UIViewController *)viewControllerAtIndex:(NSInteger)index
+{
+    NSParameterAssert(index >= 0 && index < self.viewControllers.count);
+    return self.viewControllers[index];
+}
+
 
 #pragma mark - UICollectionViewDataSource
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
@@ -516,7 +523,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         
         JYSegmentBarItem *segmentBarItem = [collectionView dequeueReusableCellWithReuseIdentifier:JYSegmentBarItemID
                                                                                      forIndexPath:indexPath];
-        UIViewController *vc = self.viewControllers[indexPath.row];
+        UIViewController *vc = [self viewControllerAtIndex:indexPath.row];
         segmentBarItem.titleLabel.text = vc.title;
         return segmentBarItem;
     }
@@ -551,6 +558,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if ([_delegate respondsToSelector:@selector(slideSegment:didSelectItemAtIndexPath:)]) {
         [_delegate slideSegment:collectionView didSelectItemAtIndexPath:indexPath];
     }
+    if ([_delegate respondsToSelector:@selector(didSelectViewController:)]) {
+        UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
+        [_delegate didSelectViewController:toSelectController];
+    }
+    
     [self scrollToViewWithIndex:indexPath.row animated:YES];
 }
 
@@ -564,7 +576,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     }
     
     BOOL flag = YES;
-    UIViewController *vc = self.viewControllers[indexPath.row];
+    UIViewController *vc = [self viewControllerAtIndex:indexPath.row];
     if ([_delegate respondsToSelector:@selector(shouldSelectViewController:)]) {
         flag = [_delegate shouldSelectViewController:vc];
     }
@@ -579,7 +591,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         return;
     }
     
-    UIViewController *toSelectController = self.viewControllers[indexPath.row];
+    UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
     if (!toSelectController.parentViewController) {
         [self addChildViewController:toSelectController];
         [cell.contentView addSubview:toSelectController.view];
@@ -613,10 +625,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
                                                                     multiplier:1
                                                                       constant:0]];
         [toSelectController didMoveToParentViewController:self];
-    }
-    
-    if ([_delegate respondsToSelector:@selector(didSelectViewController:)]) {
-        [_delegate didSelectViewController:self.selectedViewController];
+        if ([_delegate respondsToSelector:@selector(didSelectViewController:)]) {
+            [_delegate didSelectViewController:toSelectController];
+        }
     }
 }
 
@@ -630,7 +641,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if (indexPath.row >= self.viewControllers.count) {
         return;
     }
-    UIViewController *previousViewController = self.viewControllers[indexPath.row];
+    UIViewController *previousViewController = [self viewControllerAtIndex:indexPath.row];
     if (previousViewController && previousViewController.parentViewController) {
         [previousViewController willMoveToParentViewController:nil];
         [previousViewController.view removeFromSuperview];
@@ -684,14 +695,13 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 #pragma mark - Action
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated
 {
-    if (self.selectedIndex == index && !self.hasShown) {
-        return;
-    }
     NSParameterAssert(index >= 0 && index < self.viewControllers.count);
+    
     [self.slideView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]
                            atScrollPosition:UICollectionViewScrollPositionLeft
                                    animated:NO];
     [self segmentBarScrollToIndex:index animated:animated];
+    
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
         [_delegate didFullyShowViewController:self.selectedViewController];
     }
@@ -704,7 +714,9 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
     [self.segmentBar reloadData];
     [self.slideView reloadData];
     // reset to start index, if want to change index to 0, you should set startIndex before set viewControllers
-    [self setSelectedIndex:self.startIndex];
+    if (self.hasShown) {
+        [self setSelectedIndex:self.startIndex];
+    }
 }
 
 - (void)segmentBarScrollToIndex:(NSInteger)index animated:(BOOL)animated
