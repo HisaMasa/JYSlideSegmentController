@@ -152,6 +152,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 - (void)dealloc
 {
     [self removeObserver:self forKeyPath:@"slideView.contentOffset"];
+    [self removeObserver:self forKeyPath:@"slideView.contentSize"];
     [self removeObserver:self forKeyPath:@"segmentBar.contentOffset"];
 }
 
@@ -260,6 +261,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 - (void)configObservers
 {
     [self addObserver:self forKeyPath:@"slideView.contentOffset" options:NSKeyValueObservingOptionNew context:nil];
+    [self addObserver:self forKeyPath:@"slideView.contentSize" options:NSKeyValueObservingOptionNew context:nil];
     [self addObserver:self forKeyPath:@"segmentBar.contentOffset" options:NSKeyValueObservingOptionNew context:nil];
 }
 
@@ -728,16 +730,20 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 }
 
 #pragma mark - UIContentContainer
-- (void)viewWillTransitionToSize:(CGSize)size
-       withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     // record index to support targetContentOffsetForProposedContentOffset
     // https://stackoverflow.com/questions/41639968/uicollectionview-contentoffset-after-device-rotation
     self.beforeTransitionIndex = self.selectedIndex;
-    [self.slideView.collectionViewLayout invalidateLayout];
-    [self.segmentBar.collectionViewLayout invalidateLayout];
+    // unset datasource temporarily, to prevent showing unexpected view controllers when animating
+    self.slideView.dataSource = nil;
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+        [self.slideView.collectionViewLayout invalidateLayout];
+        [self.segmentBar.collectionViewLayout invalidateLayout];
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+        self.slideView.dataSource = self;
+    }];
 }
 
 @end
-

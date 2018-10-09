@@ -49,8 +49,7 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @optional
 - (BOOL)slideViewPanGestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
 - (BOOL)slideViewPanGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
-shouldRecognizeSimultaneouslyWithGestureRecognizer:
-(UIGestureRecognizer *)otherGestureRecognizer;
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer;
 @end
 
 @interface JYSlideView : UICollectionView <UIGestureRecognizerDelegate>
@@ -63,9 +62,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 
 /**
  *  Child viewControllers of SlideSegmentController
+ *  it will reset the selectedIndex to start index, after you setting this property,
+ *  if you want to change this performance, you should set startIndex before setting viewControllers
  */
 @property (nonatomic, copy) NSArray *viewControllers;
-@property (nonatomic, assign, readwrite) NSInteger startIndex;
+@property (nonatomic, assign) NSInteger startIndex;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) JYSlideView *slideView;
