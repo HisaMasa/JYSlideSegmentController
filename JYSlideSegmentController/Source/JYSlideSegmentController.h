@@ -42,6 +42,12 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
 - (void)slideViewDidScroll:(UIScrollView *)slideView;
 - (void)slideSegment:(UICollectionView *)segmentBar didSelectItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ *  progress of switching index, range -1 to 1, is influnced by slideView contentOffset.
+ *  0 - 1: fromIndex < toIndex (switching to right), 0 - -1: fromIndex > toIndex (switching to left)
+ */
+- (void)slideViewMovingProgress:(CGFloat)progress fromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 @end
 
 @protocol JYSlideViewDelegate <NSObject>

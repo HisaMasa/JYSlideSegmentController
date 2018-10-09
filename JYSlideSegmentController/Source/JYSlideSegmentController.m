@@ -290,6 +290,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         self.indicator.frame = indicatorFrame;
         self.indicator.center = CGPointMake(x, y);
     } else {
+        // offset didn't change
+        if (CGPointEqualToPoint(contentOffset, self.lastContentOffset) && !CGPointEqualToPoint(self.lastContentOffset, CGPointZero)) {
+            return;
+        }
         NSInteger larger = MAX(indexPaths.lastObject.item, indexPaths.firstObject.item);
         NSInteger smaller = MIN(indexPaths.lastObject.item, indexPaths.firstObject.item);
         NSInteger fromIndex = direction > 0 ? smaller : larger;
@@ -329,6 +333,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         indicatorFrame.size.height = h;
         self.indicator.frame = indicatorFrame;
         self.indicator.center = indicatorCenter;
+        if ([_delegate respondsToSelector:@selector(slideViewMovingProgress:fromIndex:toIndex:)]) {
+            [_delegate slideViewMovingProgress:progress fromIndex:fromIndex toIndex:toIndex];
+        }
     }
     
     if ([keyPath isEqualToString:@"slideView.contentOffset"]) {
