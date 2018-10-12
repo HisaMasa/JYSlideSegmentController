@@ -270,7 +270,16 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 - (void)observeValueForKeyPath:(NSString *)keyPath
                       ofObject:(id)object
                         change:(NSDictionary<NSKeyValueChangeKey,id> *)change
-                       context:(void *)context
+                      context :(void *)context
+{
+    [self adjustIndicatorFrame];
+    if ([keyPath isEqualToString:@"slideView.contentOffset"]) {
+        // recoard last content offset to adjust direction
+        self.lastContentOffset = self.slideView.contentOffset;
+    }
+}
+
+- (void)adjustIndicatorFrame
 {
     CGPoint contentOffset = self.slideView.contentOffset;
     CGFloat direction = contentOffset.x - self.lastContentOffset.x > 0 ? 1.0 : -1.0;
@@ -278,7 +287,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     CGRect indicatorFrame = self.indicator.frame;
     
     NSArray <NSIndexPath *>* indexPaths = [self.slideView indexPathsForVisibleItems];
-    if (indexPaths.count == 1) {
+    if (indexPaths.count == 0) {
+        return;
+    } else if (indexPaths.count == 1) {
         NSInteger index = [self.slideView indexPathForItemAtPoint:[self.view convertPoint:self.slideView.center toView:self.slideView]].item;
         UICollectionViewLayoutAttributes *segmentlayoutAttributes = [self.segmentBar layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
         CGFloat x = [self.segmentBar convertPoint:segmentlayoutAttributes.center toView:self.view].x;
@@ -299,7 +310,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         NSInteger fromIndex = direction > 0 ? smaller : larger;
         NSInteger toIndex = direction > 0 ? larger : smaller;
         
-        CGFloat progress = (contentOffset.x - fromIndex * slideViewWidth) / slideViewWidth;
+        CGFloat progress = slideViewWidth == 0 ? 0 : (contentOffset.x - fromIndex * slideViewWidth) / slideViewWidth;
         
         UICollectionViewLayoutAttributes *fromSegmentlayoutAttributes = [self.segmentBar layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForRow:fromIndex inSection:0]];
         UICollectionViewLayoutAttributes *toSegmentlayoutAttributes = [self.segmentBar layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForRow:toIndex inSection:0]];
@@ -336,11 +347,6 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         if ([_delegate respondsToSelector:@selector(slideViewMovingProgress:fromIndex:toIndex:)]) {
             [_delegate slideViewMovingProgress:progress fromIndex:fromIndex toIndex:toIndex];
         }
-    }
-    
-    if ([keyPath isEqualToString:@"slideView.contentOffset"]) {
-        // recoard last content offset to adjust direction
-        self.lastContentOffset = contentOffset;
     }
 }
 
@@ -705,6 +711,9 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 - (void)scrollToViewWithIndex:(NSInteger)index animated:(BOOL)animated
 {
     NSParameterAssert(index >= 0 && index < self.viewControllers.count);
+    if (index < 0 || index >= self.viewControllers.count) {
+        return;
+    }
     
     [self.slideView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]
                            atScrollPosition:UICollectionViewScrollPositionLeft
@@ -745,11 +754,18 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
     self.beforeTransitionIndex = self.selectedIndex;
     // unset datasource temporarily, to prevent showing unexpected view controllers when animating
     self.slideView.dataSource = nil;
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        [self.slideView.collectionViewLayout invalidateLayout];
-        [self.segmentBar.collectionViewLayout invalidateLayout];
-    } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+    [self.slideView.collectionViewLayout invalidateLayout];
+    [self.segmentBar.collectionViewLayout invalidateLayout];
+    [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         self.slideView.dataSource = self;
+        if (self.view.window) {
+            [self.slideView reloadData];
+            if (@available(iOS 11, *)) {
+            } else {
+                // hack for iOS8+, collectionView:targetContentOffsetForProposedContentOffset: can't be called after routation
+                [self setSelectedIndex:self.beforeTransitionIndex];
+            }
+        }
     }];
 }
 
