@@ -42,6 +42,12 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
 - (void)slideViewDidScroll:(UIScrollView *)slideView;
 - (void)slideSegment:(UICollectionView *)segmentBar didSelectItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ *  progress of switching index, range -1 to 1, is influnced by slideView contentOffset.
+ *  0 - 1: fromIndex < toIndex (switching to right), 0 - -1: fromIndex > toIndex (switching to left)
+ */
+- (void)slideViewMovingProgress:(CGFloat)progress fromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 @end
 
 @protocol JYSlideViewDelegate <NSObject>
@@ -49,28 +55,24 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @optional
 - (BOOL)slideViewPanGestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
 - (BOOL)slideViewPanGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
-    shouldRecognizeSimultaneouslyWithGestureRecognizer:
-        (UIGestureRecognizer *)otherGestureRecognizer;
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer;
 @end
 
-@interface JYSlideView : UIScrollView <UIGestureRecognizerDelegate>
+@interface JYSlideView : UICollectionView <UIGestureRecognizerDelegate>
 
 @property (nonatomic, weak) id<JYSlideViewDelegate> slideDelegate;
 
 @end
 
-typedef enum {
-    JYIndicatorWidthTypeInset,
-    JYIndicatorWidthTypeFixed
-} JYIndicatorWidthType;
-
 @interface JYSlideSegmentController : UIViewController
 
 /**
  *  Child viewControllers of SlideSegmentController
+ *  it will reset the selectedIndex to start index, after you setting this property,
+ *  if you want to change this performance, you should set startIndex before setting viewControllers
  */
 @property (nonatomic, copy) NSArray *viewControllers;
-@property (nonatomic, assign, readwrite) NSInteger startIndex;
+@property (nonatomic, assign) NSInteger startIndex;
 
 @property (nonatomic, strong, readonly) UICollectionView *segmentBar;
 @property (nonatomic, strong, readonly) JYSlideView *slideView;
@@ -81,24 +83,18 @@ typedef enum {
 /**
  *  Custom UI
  */
-@property (nonatomic, assign) CGFloat itemWidth;
-@property (nonatomic, assign) CGFloat segmentBarHeight;
-@property (nonatomic, strong) UIColor *indicatorColor;
+@property (nonatomic, assign) CGFloat segmentWidth;
+@property (nonatomic, assign) CGFloat segmentHeight;
+@property (nonatomic, assign) UIEdgeInsets segmentInsets; // segmentBar layout sectionInset
+
+@property (nonatomic, strong) UIView *indicator;
+
+@property (nonatomic, assign) UIEdgeInsets indicatorInsets;
+
+@property (nonatomic, assign) CGFloat indicatorWidth;
 @property (nonatomic, assign) CGFloat indicatorHeight;
 
-/**
- indicator`s width will adjusted according to indicatorType.
- when the indicatorType = JYIndicatorWidthTypeInset,
- we will adjust indicator`s width by using indicatorInsets property.
- when the indicatorType = JYIndicatorWidthTypeFixed,
- we will adjust indicator`s width by using indicatorWidth property.
- */
-@property (nonatomic, assign) JYIndicatorWidthType indicatorType;
-@property (nonatomic, assign) CGFloat indicatorWidth;
-@property (nonatomic, assign) UIEdgeInsets indicatorInsets;
 @property (nonatomic, strong) UIColor *separatorColor;
-@property (nonatomic, strong) UIColor *segmentBarColor;
-@property (nonatomic, assign) UIEdgeInsets segmentBarInsets;
 @property (nonatomic, assign) CGFloat separatorHeight;
 
 /**

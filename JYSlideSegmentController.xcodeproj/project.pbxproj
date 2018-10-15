@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		71431B66215B89C200454F2A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 71431B64215B89C200454F2A /* ViewController.m */; };
+		71431B67215B89C200454F2A /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 71431B65215B89C200454F2A /* ViewController.xib */; };
 		B76AFD671C36E89100935120 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B76AFD661C36E89100935120 /* LaunchScreen.storyboard */; };
 		E12DF8DF18E94BFC006B8543 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8DE18E94BFC006B8543 /* Foundation.framework */; };
 		E12DF8E118E94BFC006B8543 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8E018E94BFC006B8543 /* CoreGraphics.framework */; };
@@ -17,8 +19,6 @@
 		E12DF90118E94BFD006B8543 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF90018E94BFD006B8543 /* XCTest.framework */; };
 		E12DF90218E94BFD006B8543 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8DE18E94BFC006B8543 /* Foundation.framework */; };
 		E12DF90318E94BFD006B8543 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12DF8E218E94BFC006B8543 /* UIKit.framework */; };
-		E12DF90B18E94BFD006B8543 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E12DF90918E94BFD006B8543 /* InfoPlist.strings */; };
-		E12DF90D18E94BFD006B8543 /* JYSlideSegmentControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E12DF90C18E94BFD006B8543 /* JYSlideSegmentControllerTests.m */; };
 		E15A7BEE18EA9FBD00BD23E5 /* JYSlideSegmentController.m in Sources */ = {isa = PBXBuildFile; fileRef = E15A7BED18EA9FBD00BD23E5 /* JYSlideSegmentController.m */; };
 		E15A7BF218EA9FD700BD23E5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E15A7BF118EA9FD700BD23E5 /* AppDelegate.m */; };
 /* End PBXBuildFile section */
@@ -34,6 +34,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		71431B63215B89C200454F2A /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		71431B64215B89C200454F2A /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		71431B65215B89C200454F2A /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		B76AFD661C36E89100935120 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E12DF8DB18E94BFC006B8543 /* JYSlideSegmentController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JYSlideSegmentController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12DF8DE18E94BFC006B8543 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -46,9 +49,6 @@
 		E12DF8F918E94BFC006B8543 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E12DF8FF18E94BFD006B8543 /* JYSlideSegmentControllerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JYSlideSegmentControllerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12DF90018E94BFD006B8543 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		E12DF90818E94BFD006B8543 /* JYSlideSegmentControllerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "JYSlideSegmentControllerTests-Info.plist"; sourceTree = "<group>"; };
-		E12DF90A18E94BFD006B8543 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		E12DF90C18E94BFD006B8543 /* JYSlideSegmentControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JYSlideSegmentControllerTests.m; sourceTree = "<group>"; };
 		E15A7BEC18EA9FBD00BD23E5 /* JYSlideSegmentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JYSlideSegmentController.h; sourceTree = "<group>"; };
 		E15A7BED18EA9FBD00BD23E5 /* JYSlideSegmentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JYSlideSegmentController.m; sourceTree = "<group>"; };
 		E15A7BF018EA9FD700BD23E5 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -83,7 +83,6 @@
 			isa = PBXGroup;
 			children = (
 				E12DF8E418E94BFC006B8543 /* JYSlideSegmentController */,
-				E12DF90618E94BFD006B8543 /* JYSlideSegmentControllerTests */,
 				E12DF8DD18E94BFC006B8543 /* Frameworks */,
 				E12DF8DC18E94BFC006B8543 /* Products */,
 			);
@@ -131,24 +130,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		E12DF90618E94BFD006B8543 /* JYSlideSegmentControllerTests */ = {
-			isa = PBXGroup;
-			children = (
-				E12DF90C18E94BFD006B8543 /* JYSlideSegmentControllerTests.m */,
-				E12DF90718E94BFD006B8543 /* Supporting Files */,
-			);
-			path = JYSlideSegmentControllerTests;
-			sourceTree = "<group>";
-		};
-		E12DF90718E94BFD006B8543 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				E12DF90818E94BFD006B8543 /* JYSlideSegmentControllerTests-Info.plist */,
-				E12DF90918E94BFD006B8543 /* InfoPlist.strings */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		E15A7BEB18EA9FBD00BD23E5 /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -163,6 +144,9 @@
 			children = (
 				E15A7BF018EA9FD700BD23E5 /* AppDelegate.h */,
 				E15A7BF118EA9FD700BD23E5 /* AppDelegate.m */,
+				71431B63215B89C200454F2A /* ViewController.h */,
+				71431B64215B89C200454F2A /* ViewController.m */,
+				71431B65215B89C200454F2A /* ViewController.xib */,
 				B76AFD661C36E89100935120 /* LaunchScreen.storyboard */,
 			);
 			path = App;
@@ -246,6 +230,7 @@
 			files = (
 				B76AFD671C36E89100935120 /* LaunchScreen.storyboard in Resources */,
 				E12DF8FA18E94BFC006B8543 /* Images.xcassets in Resources */,
+				71431B67215B89C200454F2A /* ViewController.xib in Resources */,
 				E12DF8E918E94BFC006B8543 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -254,7 +239,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E12DF90B18E94BFD006B8543 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +251,7 @@
 			files = (
 				E15A7BEE18EA9FBD00BD23E5 /* JYSlideSegmentController.m in Sources */,
 				E12DF8EB18E94BFC006B8543 /* main.m in Sources */,
+				71431B66215B89C200454F2A /* ViewController.m in Sources */,
 				E15A7BF218EA9FD700BD23E5 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,7 +260,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E12DF90D18E94BFD006B8543 /* JYSlideSegmentControllerTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,14 +278,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				E12DF8E818E94BFC006B8543 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		E12DF90918E94BFD006B8543 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E12DF90A18E94BFD006B8543 /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -341,7 +317,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -374,7 +350,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -393,9 +369,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "JYSlideSegmentController/JYSlideSegmentController-Prefix.pch";
 				INFOPLIST_FILE = "JYSlideSegmentController/JYSlideSegmentController-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_CODE_SIGN_FLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jinyu.JYSlideSegmentController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -413,9 +390,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "JYSlideSegmentController/JYSlideSegmentController-Prefix.pch";
 				INFOPLIST_FILE = "JYSlideSegmentController/JYSlideSegmentController-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_CODE_SIGN_FLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jinyu.JYSlideSegmentController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
