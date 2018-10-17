@@ -140,10 +140,12 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     [self configObservers];
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewDidLayoutSubviews
 {
-    [super viewDidAppear:animated];
-    if (!self.hasShown) {
+    [super viewDidLayoutSubviews];
+    // scroll to start index, when slide view did layout (bounds not equal to CGRectZero),
+    // otherwise slide view scroll methods can't be called.
+    if (!self.hasShown && !CGRectEqualToRect(self.slideView.bounds, CGRectZero)) {
         [self setSelectedIndex:self.startIndex];
         self.hasShown = YES;
     }
@@ -609,6 +611,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
     if (!toSelectController.parentViewController) {
         [self addChildViewController:toSelectController];
+        toSelectController.view.frame = cell.contentView.bounds;
         [cell.contentView addSubview:toSelectController.view];
         [toSelectController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
         [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:toSelectController.view
@@ -760,6 +763,7 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
         self.slideView.dataSource = self;
         if (self.view.window) {
             [self.slideView reloadData];
+            [self.segmentBar reloadData];
             if (@available(iOS 11, *)) {
             } else {
                 // hack for iOS8+, collectionView:targetContentOffsetForProposedContentOffset: can't be called after routation
