@@ -12,8 +12,8 @@ JYSlideSegmentController is a view controllers container, just like the UITabBar
 #### Podfile
 
 ```ruby
-platform :ios, '6.0'
-pod "JYSlideSegmentController", "~> 1.1.0"
+platform :ios, '8.0'
+pod "JYSlideSegmentController"
 ```
 
 ## License
@@ -21,6 +21,16 @@ pod "JYSlideSegmentController", "~> 1.1.0"
 JYSlideSegmentController is available under the MIT license. See the LICENSE file for more info.
 
 ## ChangeLog
+
+2.0.1
+
+- fix bug of start index
+
+2.0.0 
+
+- refract slide view to collection view;
+- update logic of indicator and animation;
+- add slideViewMovingProgress:fromIndex:toIndex: delegate method
 
 1.3.7
 
