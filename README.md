@@ -3,13 +3,13 @@ JYSlideSegmentController
 
 JYSlideSegmentController is a view controllers container, just like the UITabBarController, with smooth gesture.
 
-##Demo
+### Demo
 
 <img src="./demo.gif" width="320">
 
-##Installation with CocoaPods
+### Installation with CocoaPods
 
-#### Podfile
+Podfile
 
 ```ruby
 platform :ios, '8.0'
@@ -21,6 +21,10 @@ pod "JYSlideSegmentController"
 JYSlideSegmentController is available under the MIT license. See the LICENSE file for more info.
 
 ## ChangeLog
+
+2.0.2
+
+-  fix indicator layout
 
 2.0.1
 
