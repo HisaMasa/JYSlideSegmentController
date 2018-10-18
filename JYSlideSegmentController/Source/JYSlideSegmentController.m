@@ -289,10 +289,16 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     CGRect indicatorFrame = self.indicator.frame;
     
     NSArray <NSIndexPath *>* indexPaths = [self.slideView indexPathsForVisibleItems];
-    if (indexPaths.count == 0) {
-        return;
-    } else if (indexPaths.count == 1) {
-        NSInteger index = [self.slideView indexPathForItemAtPoint:[self.view convertPoint:self.slideView.center toView:self.slideView]].item;
+    if (indexPaths.count <= 1) {
+        NSInteger index = 0;
+        if (indexPaths.count == 0) {
+            if (self.viewControllers.count <= self.selectedIndex) {
+                return;
+            }
+            index = self.selectedIndex;
+        } else {
+            index = [self.slideView indexPathForItemAtPoint:[self.view convertPoint:self.slideView.center toView:self.slideView]].item;
+        }
         UICollectionViewLayoutAttributes *segmentlayoutAttributes = [self.segmentBar layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
         CGFloat x = [self.segmentBar convertPoint:segmentlayoutAttributes.center toView:self.view].x;
         CGFloat y = CGRectGetMaxY(self.segmentBar.frame) - self.indicatorHeight - self.indicatorInsets.bottom;
