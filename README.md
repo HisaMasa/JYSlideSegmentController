@@ -1,6 +1,14 @@
 JYSlideSegmentController
 ========================
 
+![pods](https://img.shields.io/cocoapods/v/JYSlideSegmentController.svg)
+![platforms](https://img.shields.io/badge/platforms-iOS-orange.svg)
+![language](https://img.shields.io/badge/languages-ObjC-orange.svg)
+![total-downloads](https://img.shields.io/cocoapods/dt/JYSlideSegmentController.svg?label=Total%20Downloads&colorB=28B9FE)
+![app-using](https://img.shields.io/cocoapods/at/JYSlideSegmentController.svg?label=app-using&colorB=28B9FE)
+![license](https://img.shields.io/cocoapods/l/JYSlideSegmentController.svg)
+
+
 JYSlideSegmentController is a view controllers container, just like the UITabBarController, with smooth gesture.
 
 ### Demo
