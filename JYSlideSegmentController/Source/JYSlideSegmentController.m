@@ -105,12 +105,15 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 
 @property (nonatomic, assign) BOOL hasShown;
 
+@property (nonatomic, assign, readwrite) NSInteger selectedIndex;
+
 - (void)reset;
 
 @end
 
 @implementation JYSlideSegmentController
 @synthesize separatorColor = _separatorColor;
+@synthesize selectedIndex = _selectedIndex;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
 {
@@ -146,7 +149,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     // scroll to start index, when slide view did layout (bounds not equal to CGRectZero),
     // otherwise slide view scroll methods can't be called.
     if (!self.hasShown && !CGRectEqualToRect(self.slideView.bounds, CGRectZero)) {
-        [self setSelectedIndex:self.startIndex];
+        [self scrollToViewWithIndex:self.startIndex animated:NO];
         self.hasShown = YES;
     }
 }
@@ -483,7 +486,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 
 - (void)setSelectedIndex:(NSInteger)selectedIndex
 {
-    [self scrollToViewWithIndex:selectedIndex animated:NO];
+    // just for kvo, do not call this method directly, call scrollToViewWithIndex:animated: for instead
+    _selectedIndex = selectedIndex;
 }
 
 - (NSInteger)selectedIndex
@@ -700,6 +704,7 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
     if (scrollView == self.slideView) {
         [self segmentBarScrollToIndex:self.selectedIndex animated:YES];
+        [self setSelectedIndex:self.selectedIndex];
         if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
             [_delegate didFullyShowViewController:self.selectedViewController];
         }
@@ -710,6 +715,7 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
     if (scrollView == self.slideView) {
         [self segmentBarScrollToIndex:self.selectedIndex animated:YES];
+        [self setSelectedIndex:self.selectedIndex];
         if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
             [_delegate didFullyShowViewController:self.selectedViewController];
         }
@@ -729,9 +735,12 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
                                    animated:NO];
     [self segmentBarScrollToIndex:index animated:animated];
     
+    [self setSelectedIndex:index];
+    
     if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
         [_delegate didFullyShowViewController:self.selectedViewController];
     }
+    
 }
 
 - (void)reset
@@ -742,7 +751,7 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
     [self.slideView reloadData];
     // reset to start index, if want to change index to 0, you should set startIndex before set viewControllers
     if (self.hasShown) {
-        [self setSelectedIndex:self.startIndex];
+        [self scrollToViewWithIndex:self.startIndex animated:NO];
     }
 }
 
@@ -773,7 +782,7 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
             if (@available(iOS 11, *)) {
             } else {
                 // hack for iOS8+, collectionView:targetContentOffsetForProposedContentOffset: can't be called after routation
-                [self setSelectedIndex:self.beforeTransitionIndex];
+                [self scrollToViewWithIndex:self.beforeTransitionIndex animated:NO];
             }
         }
     }];

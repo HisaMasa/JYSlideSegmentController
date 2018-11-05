@@ -30,6 +30,10 @@ JYSlideSegmentController is available under the MIT license. See the LICENSE fil
 
 ## ChangeLog
 
+2.0.3
+
+- Fix selectedIndex KVO bug
+
 2.0.2
 
 -  fix indicator layout
