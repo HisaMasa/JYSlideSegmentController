@@ -620,9 +620,17 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     
     UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
     if (!toSelectController.parentViewController) {
-        [self addChildViewController:toSelectController];
-        toSelectController.view.frame = cell.contentView.bounds;
-        [cell.contentView addSubview:toSelectController.view];
+        // fix viewWillAppear not called on iOS 10
+        // https://stackoverflow.com/questions/18235284/uiviewcontroller-viewwillappear-not-called-when-adding-as-subview
+        if (@available(iOS 11, *)) {
+            [self addChildViewController:toSelectController];
+            toSelectController.view.frame = cell.contentView.bounds;
+            [cell.contentView addSubview:toSelectController.view];
+        } else {
+            toSelectController.view.frame = cell.contentView.bounds;
+            [cell.contentView addSubview:toSelectController.view];
+            [self addChildViewController:toSelectController];
+        }
         [toSelectController.view setTranslatesAutoresizingMaskIntoConstraints:NO];
         [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:toSelectController.view
                                                                      attribute:NSLayoutAttributeLeft
