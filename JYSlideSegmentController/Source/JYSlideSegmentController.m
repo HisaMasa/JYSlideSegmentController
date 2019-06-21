@@ -104,6 +104,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 @property (nonatomic, assign) NSInteger beforeTransitionIndex;
 
 @property (nonatomic, assign) BOOL hasShown;
+@property (nonatomic, assign) BOOL hasAddedObservers;
 
 @property (nonatomic, assign, readwrite) NSInteger selectedIndex;
 
@@ -156,9 +157,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 
 - (void)dealloc
 {
-    [self removeObserver:self forKeyPath:@"slideView.contentOffset"];
-    [self removeObserver:self forKeyPath:@"slideView.contentSize"];
-    [self removeObserver:self forKeyPath:@"segmentBar.contentOffset"];
+    if (_hasAddedObservers) {
+        [self removeObserver:self forKeyPath:@"slideView.contentOffset"];
+        [self removeObserver:self forKeyPath:@"slideView.contentSize"];
+        [self removeObserver:self forKeyPath:@"segmentBar.contentOffset"];
+    }
 }
 
 #pragma mark - Setup
@@ -268,6 +271,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     [self addObserver:self forKeyPath:@"slideView.contentOffset" options:NSKeyValueObservingOptionNew context:nil];
     [self addObserver:self forKeyPath:@"slideView.contentSize" options:NSKeyValueObservingOptionNew context:nil];
     [self addObserver:self forKeyPath:@"segmentBar.contentOffset" options:NSKeyValueObservingOptionNew context:nil];
+    self.hasAddedObservers = YES;
 }
 
 #pragma mark - KVO
