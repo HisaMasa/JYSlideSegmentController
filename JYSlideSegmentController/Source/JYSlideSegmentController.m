@@ -133,6 +133,7 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
         _lastContentOffset = CGPointZero;
         _beforeTransitionIndex = NSNotFound;
         _indicatorInsets = UIEdgeInsetsZero;
+        _segmentBarPosition = JYSlideSegmentBarPositionTop;
     }
     return self;
 }
@@ -171,21 +172,32 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     [self.view addSubview:self.slideView];
     [self.view addSubview:self.separator];
     [self.view addSubview:self.indicator];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.segmentBar
+    
+    UIView *topView;
+    UIView *bottomView;
+    if (self.segmentBarPosition == JYSlideSegmentBarPositionBottom) {
+        topView = self.slideView;
+        bottomView = self.segmentBar;
+    } else {
+        topView = self.segmentBar;
+        bottomView = self.slideView;
+    }
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:topView
                                                           attribute:NSLayoutAttributeLeft
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeLeft
                                                          multiplier:1
                                                            constant:0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.segmentBar
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:topView
                                                           attribute:NSLayoutAttributeRight
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeRight
                                                          multiplier:1
                                                            constant:0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.segmentBar
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:topView
                                                           attribute:NSLayoutAttributeTop
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.view
@@ -200,31 +212,31 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
                                                                multiplier:1
                                                                  constant:self.segmentHeight]];
     
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.slideView
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:bottomView
                                                           attribute:NSLayoutAttributeLeft
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeLeft
                                                          multiplier:1
                                                            constant:0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.slideView
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:bottomView
                                                           attribute:NSLayoutAttributeRight
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeRight
                                                          multiplier:1
                                                            constant:0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.slideView
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:bottomView
                                                           attribute:NSLayoutAttributeBottom
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeBottom
                                                          multiplier:1
                                                            constant:0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.segmentBar
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:topView
                                                           attribute:NSLayoutAttributeBottom
                                                           relatedBy:NSLayoutRelationEqual
-                                                             toItem:self.slideView
+                                                             toItem:bottomView
                                                           attribute:NSLayoutAttributeTop
                                                          multiplier:1
                                                            constant:0]];
@@ -232,21 +244,21 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
                                                           attribute:NSLayoutAttributeLeft
                                                           relatedBy:NSLayoutRelationEqual
-                                                             toItem:self.segmentBar
+                                                             toItem:topView
                                                           attribute:NSLayoutAttributeLeft
                                                          multiplier:1
                                                            constant:0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
                                                           attribute:NSLayoutAttributeRight
                                                           relatedBy:NSLayoutRelationEqual
-                                                             toItem:self.segmentBar
+                                                             toItem:topView
                                                           attribute:NSLayoutAttributeRight
                                                          multiplier:1
                                                            constant:0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.separator
                                                           attribute:NSLayoutAttributeBottom
                                                           relatedBy:NSLayoutRelationEqual
-                                                             toItem:self.segmentBar
+                                                             toItem:topView
                                                           attribute:NSLayoutAttributeBottom
                                                          multiplier:1
                                                            constant:0]];

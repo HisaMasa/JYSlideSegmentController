@@ -10,6 +10,14 @@
 
 extern NSString *const segmentBarItemID;
 
+/**
+ segmentBar vertical position.
+ */
+typedef NS_ENUM(NSInteger, JYSlideSegmentBarPosition) {
+    JYSlideSegmentBarPositionTop = 0,
+    JYSlideSegmentBarPositionBottom = 1,
+};
+
 @class JYSlideSegmentController;
 
 /**
@@ -86,6 +94,11 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 @property (nonatomic, assign) CGFloat segmentWidth;
 @property (nonatomic, assign) CGFloat segmentHeight;
 @property (nonatomic, assign) UIEdgeInsets segmentInsets; // segmentBar layout sectionInset
+
+/**
+ The segmentBar position in container. Default is JYSlideSegmentBarPositionTop.
+ */
+@property (nonatomic, assign) JYSlideSegmentBarPosition segmentBarPosition;
 
 @property (nonatomic, strong) UIView *indicator;
 
