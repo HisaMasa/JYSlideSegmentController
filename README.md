@@ -30,6 +30,10 @@ JYSlideSegmentController is available under the MIT license. See the LICENSE fil
 
 ## ChangeLog
 
+2.1.0
+
+- Add changing JYSlideSegmentBarPosition support
+
 2.0.3
 
 - Fix selectedIndex KVO bug
