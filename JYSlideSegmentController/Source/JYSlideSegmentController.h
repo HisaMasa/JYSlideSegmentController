@@ -47,9 +47,17 @@ sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 - (void)didSelectViewController:(UIViewController *)viewController;
 - (void)didFullyShowViewController:(UIViewController *)viewController;
 - (BOOL)shouldSelectViewController:(UIViewController *)viewController;
-- (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
 - (void)slideViewDidScroll:(UIScrollView *)slideView;
+
+/**
+ * scrollView delegate for segmentBar
+*/
+- (void)slideSegmentDidScroll:(UIScrollView *)segmentBar;
+- (void)slideSegmentDidEndDecelerating:(UIScrollView *)segmentBar;
+- (void)slideSegmentDidEndDragging:(UIScrollView *)segmentBar willDecelerate:(BOOL)decelerate;
 - (void)slideSegment:(UICollectionView *)segmentBar didSelectItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)slideDidEndScrollingAnimation:(UIScrollView *)segmentBar;
+- (void)slideWillBeginDragging:(UIScrollView *)segmentBar;
 
 /**
  *  progress of switching index, range -1 to 1, is influnced by slideView contentOffset.

@@ -516,7 +516,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     // Need remove previous viewControllers
     for (UIViewController *vc in _viewControllers) {
         [vc willMoveToParentViewController:nil];
-        [vc.view removeFromSuperview];
+        if (vc.parentViewController) {
+            [vc.view removeFromSuperview];
+        }
         [vc removeFromParentViewController];
         [vc didMoveToParentViewController:nil];
     }
@@ -732,7 +734,20 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
         if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
             [_delegate didFullyShowViewController:self.selectedViewController];
         }
+    } else if (scrollView == self.segmentBar) {
+        if ([_delegate respondsToSelector:@selector(slideSegmentDidEndDecelerating:)]) {
+            [_delegate slideSegmentDidEndDecelerating:scrollView];
+        }
     }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+   if (scrollView == self.segmentBar) {
+       if ([_delegate respondsToSelector:@selector(slideSegmentDidEndDragging:willDecelerate:)]) {
+           [_delegate slideSegmentDidEndDragging:scrollView willDecelerate:decelerate];
+       }
+   }
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
@@ -742,6 +757,19 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
         [self setSelectedIndex:self.selectedIndex];
         if ([_delegate respondsToSelector:@selector(didFullyShowViewController:)]) {
             [_delegate didFullyShowViewController:self.selectedViewController];
+        }
+    } else if (scrollView == self.segmentBar) {
+        if ([_delegate respondsToSelector:@selector(slideDidEndScrollingAnimation:)]) {
+            [_delegate slideDidEndScrollingAnimation:scrollView];
+        }
+    }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+   if (scrollView == self.segmentBar) {
+        if ([_delegate respondsToSelector:@selector(slideWillBeginDragging:)]) {
+            [_delegate slideWillBeginDragging:scrollView];
         }
     }
 }
