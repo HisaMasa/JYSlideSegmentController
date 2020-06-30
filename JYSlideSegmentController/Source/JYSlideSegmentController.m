@@ -528,16 +528,17 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 
 - (UIViewController *)selectedViewController
 {
-    if (self.selectedIndex < self.viewControllers.count) {
-        return [self viewControllerAtIndex:self.selectedIndex];
-    }
-    return nil;
+    return [self viewControllerAtIndex:self.selectedIndex];
 }
 
 - (UIViewController *)viewControllerAtIndex:(NSInteger)index
 {
     NSParameterAssert(index >= 0 && index < self.viewControllers.count);
-    return self.viewControllers[index];
+
+    if (index < self.viewControllers.count && index >= 0) {
+        return self.viewControllers[index];
+    }
+    return nil;
 }
 
 
@@ -597,14 +598,16 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if (collectionView == self.slideView) {
         return;
     }
-    if (indexPath.row < 0 || indexPath.row >= self.viewControllers.count) {
+    UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
+    if (toSelectController == nil) {
         return;
     }
+
     if ([_delegate respondsToSelector:@selector(slideSegment:didSelectItemAtIndexPath:)]) {
         [_delegate slideSegment:collectionView didSelectItemAtIndexPath:indexPath];
     }
     if ([_delegate respondsToSelector:@selector(didSelectViewController:)]) {
-        UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
+        
         [_delegate didSelectViewController:toSelectController];
     }
     
@@ -616,12 +619,13 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if (collectionView == self.slideView) {
         return NO;
     }
-    if (indexPath.row < 0 || indexPath.row >= self.viewControllers.count) {
+    UIViewController *vc = [self viewControllerAtIndex:indexPath.row];
+    if (vc == nil) {
         return NO;
     }
     
     BOOL flag = YES;
-    UIViewController *vc = [self viewControllerAtIndex:indexPath.row];
+    
     if ([_delegate respondsToSelector:@selector(shouldSelectViewController:)]) {
         flag = [_delegate shouldSelectViewController:vc];
     }
@@ -635,8 +639,12 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if (collectionView == self.segmentBar) {
         return;
     }
-    
+
     UIViewController *toSelectController = [self viewControllerAtIndex:indexPath.row];
+    if (toSelectController == nil) {
+        return;
+    }
+    
     if (!toSelectController.parentViewController) {
         // fix viewWillAppear not called on iOS 10
         // https://stackoverflow.com/questions/18235284/uiviewcontroller-viewwillappear-not-called-when-adding-as-subview
@@ -692,10 +700,12 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if (collectionView == self.segmentBar) {
         return;
     }
-    if (indexPath.row >= self.viewControllers.count) {
+    
+    UIViewController *previousViewController = [self viewControllerAtIndex:indexPath.row];
+    if (previousViewController == nil) {
         return;
     }
-    UIViewController *previousViewController = [self viewControllerAtIndex:indexPath.row];
+    
     if (previousViewController && previousViewController.parentViewController) {
         [previousViewController willMoveToParentViewController:nil];
         [previousViewController.view removeFromSuperview];
