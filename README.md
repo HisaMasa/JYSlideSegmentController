@@ -30,6 +30,10 @@ JYSlideSegmentController is available under the MIT license. See the LICENSE fil
 
 ## ChangeLog
 
+2.2.1
+
+- Fix selectedIndex overflow
+
 2.1.1
 
 - Add scroll delegate for segmentBar
