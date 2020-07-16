@@ -148,9 +148,9 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-    // scroll to start index, when slide view did layout (bounds not equal to CGRectZero),
+    // scroll to start index, when slide view did layout (bounds.size.width > 0),
     // otherwise slide view scroll methods can't be called.
-    if (!self.hasShown && !CGRectEqualToRect(self.slideView.bounds, CGRectZero)) {
+    if (!self.hasShown && self.slideView.bounds.size.width > 0) {
         [self scrollToViewWithIndex:self.startIndex animated:NO];
         self.hasShown = YES;
     }
