@@ -122,8 +122,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
  *  By default segmentBar use viewController's title for segment's button title
  *  You should implement JYSlideSegmentDataSource & JYSlideSegmentDelegate instead of segmentBar delegate & datasource
  */
-@property (nonatomic, assign) id <JYSlideSegmentDelegate> delegate;
-@property (nonatomic, assign) id <JYSlideSegmentDataSource> dataSource;
+@property (nonatomic, weak) id <JYSlideSegmentDelegate> delegate;
+@property (nonatomic, weak) id <JYSlideSegmentDataSource> dataSource;
 
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers;
 - (instancetype)initWithViewControllers:(NSArray *)viewControllers
