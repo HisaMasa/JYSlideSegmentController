@@ -700,6 +700,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:
     if (collectionView == self.segmentBar) {
         return;
     }
+    /* 在更换数据源viewControllers时候，若新数据源数量 < 老数据源数量，会触发方法viewControllerAtIndex的断言。 */
+    if (self.viewControllers.count <= indexPath.row) {
+        return;
+    }
     
     UIViewController *previousViewController = [self viewControllerAtIndex:indexPath.row];
     if (previousViewController == nil) {
