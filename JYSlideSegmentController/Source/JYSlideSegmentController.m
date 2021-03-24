@@ -796,6 +796,11 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
         return;
     }
     
+    if (!self.hasShown) {
+        //if set selectedIndex before shown, means current index is start
+        self.startIndex = index;
+    }
+    
     [self.slideView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]
                            atScrollPosition:UICollectionViewScrollPositionLeft
                                    animated:NO];
@@ -817,7 +822,8 @@ targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
     [self.slideView reloadData];
     // reset to start index, if want to change index to 0, you should set startIndex before set viewControllers
     if (self.hasShown) {
-        [self scrollToViewWithIndex:self.startIndex animated:NO];
+        NSInteger startIndex = self.startIndex >= self.viewControllers.count ? 0 : self.startIndex;
+        [self scrollToViewWithIndex:startIndex animated:NO];
     }
 }
 
